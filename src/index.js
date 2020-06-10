@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 
 function EditableCardListRow({ card, saveCard, deleteCard }) {
-  const [fields, setFields] = React.useState({ card })
+  const [fields, setFields] = useState(card)
 
   return (
     <tr>
@@ -33,7 +33,7 @@ function UneditableCardListRow({ card, setEditable }) {
 }
 
 function CardsListRow({ card, editCard, deleteCard }) {
-  const [editable, setEditable] = React.useState(false)
+  const [editable, setEditable] = useState(false)
 
   if (editable) {
     return (
@@ -80,7 +80,7 @@ function CardsList({ cards, editCard, deleteCard }) {
 }
 
 function AddCardForm({ addCard }) {
-  const [fields, setFields] = React.useState({ front: '', back: '' })
+  const [fields, setFields] = useState({ front: '', back: '' })
 
   return (
     <form onSubmit={(e) => {
@@ -107,7 +107,7 @@ function AddCardForm({ addCard }) {
 
 // TODO: rename
 function CardDisplay({ card, showNextCard }) {
-  const [flipped, setFlipped] = React.useState(false)
+  const [flipped, setFlipped] = useState(false)
 
   return (
     <div>
@@ -122,16 +122,14 @@ function CardDisplay({ card, showNextCard }) {
   )
 }
 
-const initialCards = [
-  { front: 'Dog', back: '개' },
-  { front: 'Cat', back: '고양이' },
-  { front: 'Fish', back: '물고기' },
-]
+function App({ initialCards }) {
+  const [cards, setCards] = useState(initialCards)
+  const [listVisible, setListVisible] = useState(true)
+  const [currentCardIndex, setCurrentCardIndex] = useState(0)
 
-function App(props) {
-  const [cards, setCards] = React.useState(initialCards)
-  const [listVisible, setListVisible] = React.useState(true)
-  const [currentCardIndex, setCurrentCardIndex] = React.useState(0)
+  useEffect(() => {
+    localStorage.setItem('cards', JSON.stringify(cards))
+  }, [cards])
 
   // TODO: do CSS shit to make the card and list display side by side
   return (
@@ -147,7 +145,9 @@ function App(props) {
       {listVisible &&
         <div>
           <AddCardForm
-            addCard={(card) => (setCards([...cards, card]))} />
+            addCard={(card) => {
+              setCards([...cards, card])
+            }} />
           <CardsList
             cards={cards}
             deleteCard={(index) => {
@@ -165,4 +165,16 @@ function App(props) {
   )
 }
 
-ReactDOM.render(<App />, document.getElementById('root'))
+let initialCards = JSON.parse(localStorage.getItem('cards'))
+if (!initialCards) {
+  initialCards = [
+    { front: 'Dog', back: '개' },
+    { front: 'Cat', back: '고양이' },
+    { front: 'Fish', back: '물고기' },
+  ]
+}
+
+ReactDOM.render(
+  <App initialCards={initialCards} />,
+  document.getElementById('root')
+)
