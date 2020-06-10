@@ -2,22 +2,21 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 function EditableCardListRow({ card, saveCard, deleteCard }) {
-  const [front, setFront] = React.useState(card.front)
-  const [back, setBack] = React.useState(card.back)
+  const [fields, setFields] = React.useState({ card })
 
   return (
     <tr>
       <td><input
         type='text'
         name='front'
-        value={front}
-        onChange={(e) => setFront(e.target.value)} /></td>
+        value={fields.front}
+        onChange={(e) => setFields({ ...fields, front: e.target.value })} /></td>
       <td><input
         type='text'
         name='back'
-        value={back}
-        onChange={(e) => setBack(e.target.value)} /></td>
-      <td><button onClick={() => saveCard({ front: front, back: back })}>Save</button></td>
+        value={fields.back}
+        onChange={(e) => setFields({ ...fields, back: e.target.value })} /></td>
+      <td><button onClick={() => saveCard(fields)}>Save</button></td>
       <td><button onClick={deleteCard}>Delete</button></td>
     </tr>
   )
@@ -33,26 +32,21 @@ function UneditableCardListRow({ card, setEditable }) {
   )
 }
 
-function CardsListRow({ card, editCard, ...props }) {
+function CardsListRow({ card, editCard, deleteCard }) {
   const [editable, setEditable] = React.useState(false)
-
-  let saveCard = (newCard) => {
-    editCard(newCard)
-    setEditable(false)
-  }
-
-  // TODO: what's the best way to handle these names?
-  let deleteCard = () => {
-    props.deleteCard()
-    setEditable(false)
-  }
 
   if (editable) {
     return (
       <EditableCardListRow
         card={card}
-        saveCard={saveCard}
-        deleteCard={deleteCard} />
+        saveCard={(newCard) => {
+          editCard(newCard)
+          setEditable(false)
+        }}
+        deleteCard={() => {
+          deleteCard()
+          setEditable(false)
+        }} />
     )
   } else {
     return (
@@ -86,49 +80,43 @@ function CardsList({ cards, editCard, deleteCard }) {
 }
 
 function AddCardForm({ addCard }) {
-  const [front, setFront] = React.useState('')
-  const [back, setBack] = React.useState('')
-
-  let handleSubmit = (e) => {
-    e.preventDefault()
-    addCard({ front: front, back: back })
-    setFront('')
-    setBack('')
-  }
+  const [fields, setFields] = React.useState({ front: '', back: '' })
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => {
+      e.preventDefault()
+      addCard(fields)
+      setFields({ front: '', back: '' })
+    }}>
       <input
         type='text'
         name='front'
         placeholder='Front'
-        value={front}
-        onChange={(e) => setFront(e.target.value)} />
+        value={fields.front}
+        onChange={(e) => setFields({ ...fields, front: e.target.value })} />
       <input
         type='text'
         name='back'
         placeholder='Back'
-        value={back}
-        onChange={(e) => setBack(e.target.value)} />
+        value={fields.back}
+        onChange={(e) => setFields({ ...fields, back: e.target.value })} />
       <input type='submit' value='Add Card' />
     </form >
   )
 }
 
 // TODO: rename
-function CardDisplay({ card, displayNextCard }) {
+function CardDisplay({ card, showNextCard }) {
   const [flipped, setFlipped] = React.useState(false)
-
-  let showNextCard = () => {
-    displayNextCard()
-    setFlipped(false)
-  }
 
   return (
     <div>
       <h1>{flipped ? card.back : card.front}</h1>
       <button onClick={() => setFlipped(!flipped)}>Flip Card</button>
-      <button onClick={showNextCard}>Next Card</button>
+      <button onClick={() => {
+        showNextCard()
+        setFlipped(false)
+      }}>Next Card</button>
       <hr></hr>
     </div>
   )
@@ -145,43 +133,33 @@ function App(props) {
   const [listVisible, setListVisible] = React.useState(true)
   const [currentCardIndex, setCurrentCardIndex] = React.useState(0)
 
-  let deleteCard = (indexToDelete) => {
-    setCards(cards.filter((card, index) => {
-      return index !== indexToDelete
-    }))
-  }
-
-  let addCard = (card) => {
-    setCards([...cards, card])
-  }
-
-  let editCard = (indexToEdit, newCard) => {
-    setCards(cards.map((card, index) => {
-      return index === indexToEdit ? newCard : card
-    }))
-  }
-
-  let showNextCard = () => {
-    setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)
-  }
-
-  // TODO: do CSS shit to make the card and list side by side
+  // TODO: do CSS shit to make the card and list display side by side
   return (
     <div>
       <CardDisplay
         card={cards[currentCardIndex]}
-        displayNextCard={showNextCard} />
+        showNextCard={() => (
+          setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)
+        )} />
       <button onClick={() => setListVisible(!listVisible)}>
         {listVisible ? 'Hide List' : 'Show List'}
       </button>
       {listVisible &&
         <div>
           <AddCardForm
-            addCard={addCard} />
+            addCard={(card) => (setCards([...cards, card]))} />
           <CardsList
             cards={cards}
-            deleteCard={deleteCard}
-            editCard={editCard} />
+            deleteCard={(index) => {
+              setCards(cards.filter((card, i) => {
+                return index !== i
+              }))
+            }}
+            editCard={(index, newCard) => {
+              setCards(cards.map((card, i) => {
+                return index === i ? newCard : card
+              }))
+            }} />
         </div>}
     </div>
   )
