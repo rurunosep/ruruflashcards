@@ -56,8 +56,8 @@ function CardsListRow({ card, editCard, deleteCard }) {
     <tr>
       <td><input
         type='checkbox'
-        checked={card.active}
-        onChange={(e) => editCard({ active: e.target.checked })} /></td>
+        checked={card.enabled}
+        onChange={(e) => editCard({ enabled: e.target.checked })} /></td>
       {row}
     </tr>
   )
@@ -87,10 +87,11 @@ function AddCardForm({ addCard }) {
   )
 }
 
-function CardsList({ cards, addCard, editCard, deleteCard, setAllCardsActive }) {
+function CardsList({ cards, addCard, editCard, deleteCard, setAllCardsEnabled, swapAllFields }) {
+  const [addingCard, setAddingCard] = useState(false)
+
   return (
     <div>
-      <AddCardForm addCard={addCard} />
       <table>
         <thead>
           <tr>
@@ -109,14 +110,21 @@ function CardsList({ cards, addCard, editCard, deleteCard, setAllCardsActive }) 
           ))}
         </tbody>
       </table>
-      <button onClick={() => setAllCardsActive(true)}>All Active</button>
-      <button onClick={() => setAllCardsActive(false)}>All Inactive</button>
+      {addingCard
+        ? <AddCardForm addCard={(fields) => {
+          addCard(fields)
+          setAddingCard(false)
+        }} />
+        : <div><button onClick={() => setAddingCard(true)}>New Card</button></div>}
+      <button onClick={() => setAllCardsEnabled(true)}>Enable All</button>
+      <button onClick={() => setAllCardsEnabled(false)}>Disable All</button>
+      <button onClick={swapAllFields}>Swap Fields</button>
     </div>
   )
 }
 
-// TODO: rename
-function CardDisplay({ card, showNextCard, editCard }) {
+// TODO: rename?
+function CardDisplay({ card, showNewCard, editCard }) {
   const [flipped, setFlipped] = useState(false)
 
   if (!card) card = { front: '', back: '' }
@@ -126,15 +134,13 @@ function CardDisplay({ card, showNextCard, editCard }) {
       <h1>{flipped ? card.back : card.front}</h1>
       <button onClick={() => setFlipped(!flipped)}>Flip</button>
       <button onClick={() => {
-        showNextCard()
+        showNewCard()
         setFlipped(false)
       }}>Next</button>
       <button onClick={() => {
-        editCard({ active: false })
-        // TODO: updating state is async and hasn't finished yet. card is still active
-        // and if it was the only active one left, showNextCard will show the same one
-        showNextCard()
-      }}>Set Inactive</button>
+        editCard({ enabled: false })
+        showNewCard()
+      }}>Disable</button>
       <hr></hr>
     </div>
   )
@@ -144,27 +150,33 @@ function App({ initialCards }) {
   const [cards, setCards] = useState(initialCards)
   const [listVisible, setListVisible] = useState(true)
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
+  const [shouldShowNewCard, setShouldShowNewCard] = useState(false)
 
-  useEffect(() => {
+  // TODO: ASK ALEX about named/anonymous/comment conventions here
+  useEffect(function saveCardsToLocalStorage() {
     localStorage.setItem('cards', JSON.stringify(cards))
   }, [cards])
+
+  // TODO: ASK ALEX if this is the best way to do this ("should" bool in state and a hook)
+  useEffect(function showRandomCard() {
+    if (shouldShowNewCard) {
+      let newCardIndex = null
+      if (cards.filter(card => card.enabled).length > 0) {
+        do {
+          newCardIndex = Math.floor(Math.random() * cards.length)
+        } while (!cards[newCardIndex].enabled)
+      }
+      setCurrentCardIndex(newCardIndex)
+      setShouldShowNewCard(false)
+    }
+  })
 
   // TODO: do CSS shit to make the card and list display side by side
   return (
     <div>
       <CardDisplay
         card={cards[currentCardIndex]}
-        showNextCard={() => {
-          //TODO: pull this out?
-          let nextCardIndex = null
-          if (cards.filter(card => card.active).length > 0) {
-            nextCardIndex = currentCardIndex
-            do {
-              nextCardIndex = nextCardIndex < cards.length - 1 ? nextCardIndex + 1 : 0
-            } while (!cards[nextCardIndex].active)
-          }
-          setCurrentCardIndex(nextCardIndex)
-        }}
+        showNewCard={() => setShouldShowNewCard(true)}
         editCard={(changes) => {
           setCards(cards.map((card, i) => {
             return currentCardIndex === i ? { ...card, ...changes } : card
@@ -176,8 +188,8 @@ function App({ initialCards }) {
       {listVisible &&
         <CardsList
           cards={cards}
-          addCard={(card) => {
-            setCards([...cards, { active: true, ...card }])
+          addCard={(fields) => {
+            setCards([...cards, { enabled: true, ...fields }])
           }}
           editCard={(index, changes) => {
             setCards(cards.map((card, i) => {
@@ -189,11 +201,17 @@ function App({ initialCards }) {
               return index !== i
             }))
           }}
-          setAllCardsActive={(active) => {
+          setAllCardsEnabled={(enabled) => {
             setCards(cards.map((card) => {
-              return { ...card, active: active }
+              return { ...card, enabled: enabled }
+            }))
+          }}
+          swapAllFields={() => {
+            setCards(cards.map((card) => {
+              return { ...card, front: card.back, back: card.front }
             }))
           }} />}
+      <br />
     </div>
   )
 }
@@ -201,9 +219,9 @@ function App({ initialCards }) {
 let initialCards = JSON.parse(localStorage.getItem('cards'))
 if (!initialCards) {
   initialCards = [
-    { active: true, front: 'Dog', back: '개' },
-    { active: true, front: 'Cat', back: '고양이' },
-    { active: true, front: 'Fish', back: '물고기' },
+    { enabled: true, front: '개', back: 'Dog' },
+    { enabled: true, front: '고양이', back: 'Cat' },
+    { enabled: true, front: '물고기', back: 'Fish' },
   ]
 }
 
