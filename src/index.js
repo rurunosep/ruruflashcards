@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
+import { TextToSpeechClient, AudioEncoding } from '@google-cloud/text-to-speech'
+import { google } from '@google-cloud/text-to-speech/build/protos/protos'
+import { JWT } from 'google-auth-library'
 import './index.css'
 
 function EditableCardListRow({ card, editCard, deleteCard, setUneditable }) {
@@ -22,11 +25,10 @@ function EditableCardListRow({ card, editCard, deleteCard, setUneditable }) {
         />
       </td>
       <td>
-        <button
-          onClick={() => {
-            editCard(fields)
-            setUneditable()
-          }}
+        <button onClick={() => {
+          editCard(fields)
+          setUneditable()
+        }}
         >
           Save
         </button>
@@ -53,13 +55,10 @@ function UneditableCardListRow({ card, setEditable }) {
 function CardsListRow({ card, editCard, deleteCard }) {
   const [editable, setEditable] = useState(false)
 
-  // TODO: rename/cleanup/whatever
   const row = editable ? (
     <EditableCardListRow
       card={card}
-      editCard={(changes) => {
-        editCard(changes)
-      }}
+      editCard={editCard}
       deleteCard={() => {
         deleteCard()
         setEditable(false)
@@ -67,8 +66,8 @@ function CardsListRow({ card, editCard, deleteCard }) {
       setUneditable={() => setEditable(false)}
     />
   ) : (
-    <UneditableCardListRow card={card} setEditable={() => setEditable(true)} />
-  )
+      <UneditableCardListRow card={card} setEditable={() => setEditable(true)} />
+    )
 
   return (
     <tr>
@@ -87,14 +86,14 @@ function CardsListRow({ card, editCard, deleteCard }) {
 function AddCardForm({ addCard }) {
   const [fields, setFields] = useState({ front: '', back: '' })
 
+  const onSubmit = (e) => {
+    e.preventDefault()
+    addCard(fields)
+    setFields({ front: '', back: '' })
+  }
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        addCard(fields)
-        setFields({ front: '', back: '' })
-      }}
-    >
+    <form onSubmit={onSubmit}>
       <input
         type="text"
         placeholder="Front"
@@ -112,19 +111,12 @@ function AddCardForm({ addCard }) {
   )
 }
 
-function CardsList({
-  cards,
-  addCard,
-  editCard,
-  deleteCard,
-  setAllCardsEnabled,
-  swapAllFields,
-}) {
+function CardsList({ cards, addCard, editCard, deleteCard, setAllCardsEnabled, swapAllFields }) {
   const [addingCard, setAddingCard] = useState(false)
 
   return (
     <div>
-      <table>
+      <table style={{ width: '100%' }}>
         <thead>
           <tr>
             <th></th>
@@ -143,6 +135,7 @@ function CardsList({
           ))}
         </tbody>
       </table>
+
       {addingCard ? (
         <AddCardForm
           addCard={(fields) => {
@@ -151,13 +144,16 @@ function CardsList({
           }}
         />
       ) : (
-        <div>
-          <button onClick={() => setAddingCard(true)}>New Card</button>
-        </div>
-      )}
-      <button onClick={() => setAllCardsEnabled(true)}>Enable All</button>
-      <button onClick={() => setAllCardsEnabled(false)}>Disable All</button>
-      <button onClick={swapAllFields}>Swap Fields</button>
+          <div>
+            <button onClick={() => setAddingCard(true)}>New Card</button>
+          </div>
+        )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <button onClick={() => setAllCardsEnabled(true)}>Enable All</button>
+        <button onClick={() => setAllCardsEnabled(false)}>Disable All</button>
+        <button onClick={swapAllFields}>Swap Fields</button>
+      </div>
     </div>
   )
 }
@@ -168,6 +164,20 @@ function CardDisplay({ card, showNewCard, editCard }) {
 
   if (!card) card = { front: '', back: '' }
 
+  const playTTS = async function (text) {
+    const request = {
+      input: { text: text },
+      voice: { languageCode: 'ko-KR', ssmlGender: 'NEUTRAL' },
+      audioConfig: { audioEncoding: google.cloud.texttospeech.v1.AudioEncoding.MP3 },
+    };
+
+    const [response] = await ttsClient.synthesizeSpeech(request)
+    const blob = new Blob([response.audioContent], { type: 'audio/mp3' })
+    const url = window.URL.createObjectURL(blob)
+    const audio = new Audio(url)
+    audio.play()
+  }
+
   return (
     <div>
       <div
@@ -175,12 +185,13 @@ function CardDisplay({ card, showNewCard, editCard }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 200,
+          width: 300,
           height: 200,
         }}
       >
         <h1 style={{ margin: 0 }}>{flipped ? card.back : card.front}</h1>
       </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button onClick={() => setFlipped(!flipped)}>Flip</button>
         <button
@@ -198,6 +209,9 @@ function CardDisplay({ card, showNewCard, editCard }) {
           }}
         >
           Disable
+        </button>
+        <button onClick={() => { playTTS(card.front) }}>
+          Play
         </button>
       </div>
     </div>
@@ -230,32 +244,36 @@ function App({ initialCards }) {
         setShouldShowNewCard(false)
       }
     },
-    [shouldShowNewCard, cards]
+    [shouldShowNewCard]
   )
 
-  // TODO: do CSS shit to make the card and list display side by side
   return (
     <div
       style={{
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: 'pink',
       }}
     >
-      <CardDisplay
-        card={cards[currentCardIndex]}
-        showNewCard={() => setShouldShowNewCard(true)}
-        editCard={(changes) =>
-          setCards(
-            cards.map((card, i) =>
-              currentCardIndex === i ? { ...card, ...changes } : card
+      <div>
+        <CardDisplay
+          card={cards[currentCardIndex]}
+          showNewCard={() => setShouldShowNewCard(true)}
+          editCard={(changes) =>
+            setCards(
+              cards.map((card, i) =>
+                currentCardIndex === i ? { ...card, ...changes } : card
+              )
             )
-          )
-        }
-      />
-      <div style={{ marginLeft: 20 }}>
+          }
+        />
+      </div>
+
+      <div
+        style={{
+          minWidth: 300,
+          margin: 20
+        }}
+      >
         <button onClick={() => setListVisible(!listVisible)}>
           {listVisible ? 'Hide List' : 'Show List'}
         </button>
@@ -302,6 +320,29 @@ if (!initialCards) {
     { enabled: true, front: '물고기', back: 'Fish' },
   ]
 }
+
+// TODO: clean this TTS initialization up
+
+const authJSON = {
+  type: "service_account",
+  project_id: "ruruflashcards",
+  private_key_id: "acceae75f2711f9eeb724520248a9cf779f8d8cc",
+  private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDR/q75TPMsWUen\nBZg+FJQRCjSvPM1cpKl954Svp1hOIw2xjIHqXw1d/f1obXmgjgU4iYW8x/IJCfsK\nGUGWUF418ad1X113rGoaHQQpakjOubbeg9j4GAKjAeVz8XDK34oFYFJ997Bsl3rg\nm6np6eQ1+q2zKq2JH82aRMDD5YeBFUlTKPqfkRw4BPPdYHtYQhlh/vu+QbRww2tW\n0hsc4EY+GeC0AwUXRcjzY+UAreWRgM9uAJI+Lqv47iI//NmvEYKWdecIbYcruxKp\n4D8qTCdMrYPLF9kDK1jYUsklsqe51G4FZFwEXbOTV1GQBn133JVEzsLl1dHr2zCJ\nz7BXr1qvAgMBAAECggEARnjTbIuD4gK2Npl8jXzncc58fsCHZItH7B5Jm48r5dEC\ns+5k3Ov4Nu5ZX/W5RwXSP7Z7IK7zDVCBpFJ0fcbLzwuheJS/77z3QHszXdiyxVly\nwrr5kcyw+dZVk/LXOOYK0iIQnQCF/vNZA86Jl5vr/6d4KnPsl+OJ4rcm/7bkIg+Q\nexuGpLaONQiF2NIvQq/pi5HdZHq+iTF80tn7UfnuAm+J4jY6/npVRYXJXbunonzG\npPewvrGNGjCCjvGf0yPXKiOwKSkjuCTN4TH+VJZZSGV/rhmoYTkf7hZXDHihfEix\nQQ/UdomJTMljPPkpHsg/U/fRsIB2qpsSR0jtxSx5xQKBgQDwRS3M1VkdBzdxaSKN\nfLq09kAZc70j1h2ctrJPHa2YCFHJjOEmhEaN/twyHlXcVb1dMVnfwUwxeO5UZhwS\n3CI3VI18u3vMr0KVHCgtCIeWVeNnlaJ8yw8V2vqkfuTjgGYWpCY2Qo411SOam3Vl\nzJoDFKx7+zgi/XxXjK0mxEWQnQKBgQDfvhpaaIeFWZd/GQmxzy1SHhSBvCNfUOpC\nt4i7xvyIRY8NO5r6q5aM9xEenDyzl4nc01kIswqOhgKH34VuICa5mOHXUJz1CXUe\n1a7/TzUhZ8GeOWl7Z1JGPw29bpfUAkeRlmmTRwunRSDgF46kJQUNrBQgg1WOKg5/\n2NhtF5AYuwKBgQCpeuK3nbZiN3jwUozA6L56b0j/qxg7cwkoRea4z+JnX1bxqKIY\nnS13c9K2t5cw+Hm+htUydBLewsK6XdxnoUexZ771wPmug+GfdGESgvXBIYxqwK4B\nAOr/K5uo9KlXoHZieh9KHuBZMKMQp5/D0vLAQZD5U1dhtxRCXUS2F7RKMQKBgQCf\nOLusRuLaRM2IxxqdDKBl5b4WLPrHI9/xpoaJiqu/ljCc7CP36w/yNQhbzjdsXpTf\nLxAXHsKOdlNquehMXFjyjxd4kIeB4T8VuF8WlRlsMlgY7yZfiUGFd+2hNwiY+R5R\nPsbW5iIm4QzqLBl4OlgESMbx9ER4LPmwhXJPAAutbQKBgQDPJLj6dIVLoimBydpv\nlv8V94Hfh3oLSoaMIu5ONOUjbYReE5/gZfsJ9wv2BKEmdhxTcDyEEo4Vjx1MK0zD\nk2uWGNebIkjHY+um/rRVzc/TRAUR4GSwWjzX3NNzVTxkhMj11zxpyruNU3Vo+UwU\ns7LkwlgtHEbLEa59eP+tojg8OA==\n-----END PRIVATE KEY-----\n",
+  client_email: "ruruflashcards-user@ruruflashcards.iam.gserviceaccount.com",
+  client_id: "108355697865110828466",
+  auth_uri: "https://accounts.google.com/o/oauth2/auth",
+  token_uri: "https://oauth2.googleapis.com/token",
+  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+  client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/ruruflashcards-user%40ruruflashcards.iam.gserviceaccount.com"
+}
+
+const authClient = new JWT({
+  email: authJSON.client_email,
+  key: authJSON.private_key,
+  scopes: ['https://www.googleapis.com/auth/cloud-platform']
+})
+
+const ttsClient = new TextToSpeechClient({ auth: authClient })
 
 ReactDOM.render(
   <App initialCards={initialCards} />,
