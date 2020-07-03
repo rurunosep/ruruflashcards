@@ -177,11 +177,11 @@ function TTSOptions({ languages, voices, selectedLanguage, selectedVoice, setLan
   )
 }
 
-// TODO: rename?
+// TODO: rename or restructure?
 function CardDisplay({ card, showNewCard, editCard, ttsClient, voices, languageCodes }) {
   const [flipped, setFlipped] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState(languageCodes[0])
-  const [selectedVoice, setSelectedVoice] = useState()
+  const [selectedVoice, setSelectedVoice] = useState(undefined)
 
   voices = voices.filter((voice) => voice.languageCodes.includes(selectedLanguage))
     .sort((a, b) => {
@@ -196,7 +196,10 @@ function CardDisplay({ card, showNewCard, editCard, ttsClient, voices, languageC
 
   if (!card) card = { front: '', back: '' }
 
+  // TODO: maybe cache some results?
   const playTTS = async function (text) {
+    if (!ttsClient || !selectedLanguage || !selectedVoice) return
+
     const request = {
       input: { text: text },
       voice: { languageCode: selectedLanguage, name: selectedVoice },
@@ -243,20 +246,25 @@ function CardDisplay({ card, showNewCard, editCard, ttsClient, voices, languageC
         >
           Disable
         </button>
-        <button onClick={() => { playTTS(card.front) }}>
+        <button
+          onClick={() => { playTTS(flipped ? card.back : card.front) }}
+          disabled={!ttsClient}
+        >
           Play
         </button>
       </div>
 
-      <TTSOptions
-        languages={languageCodes}
-        voices={voices}
-        selectedLanguage={selectedLanguage}
-        selectedVoice={selectedVoice}
-        setLanguage={setSelectedLanguage}
-        setVoice={setSelectedVoice}
-      />
-    </div>
+      {ttsClient && (
+        <TTSOptions
+          languages={languageCodes}
+          voices={voices}
+          selectedLanguage={selectedLanguage}
+          selectedVoice={selectedVoice}
+          setLanguage={setSelectedLanguage}
+          setVoice={setSelectedVoice}
+        />
+      )}
+    </div >
   )
 }
 
@@ -273,6 +281,7 @@ function App({ initialCards, ttsClient, voices, languageCodes }) {
     [cards]
   )
 
+  // TODO: do this more nicely
   useEffect(
     function showRandomCard() {
       if (shouldShowNewCard) {
@@ -355,16 +364,11 @@ function App({ initialCards, ttsClient, voices, languageCodes }) {
   )
 }
 
-async function main() {
-  let initialCards = JSON.parse(localStorage.getItem('cards'))
-  if (!initialCards) {
-    initialCards = [
-      { enabled: true, front: '개', back: 'Dog' },
-      { enabled: true, front: '고양이', back: 'Cat' },
-      { enabled: true, front: '물고기', back: 'Fish' },
-    ]
-  }
-
+// TODO: properly catch any errors in initialization
+async function initializeTTS() {
+  /* ~~~~~
+    ♡ Pretty please, no stealerino ♡
+  ~~~~~ */
   const authJSON = {
     type: "service_account",
     project_id: "ruruflashcards",
@@ -390,6 +394,24 @@ async function main() {
   const voices = response.voices
   const languageCodes =
     [...new Set(voices.map((v) => v.languageCodes).reduce((flat, x) => [...flat, ...x]))].sort()
+
+  return { ttsClient, voices, languageCodes }
+}
+
+async function main() {
+  let initialCards = JSON.parse(localStorage.getItem('cards'))
+  if (!initialCards) {
+    initialCards = [
+      { enabled: true, front: '개', back: 'Dog' },
+      { enabled: true, front: '고양이', back: 'Cat' },
+      { enabled: true, front: '물고기', back: 'Fish' },
+    ]
+  }
+
+  // If initialization failed, these should all be undefined. Probably.
+  let { ttsClient, voices, languageCodes } = initializeTTS()
+  voices = voices ? voices : []
+  languageCodes = languageCodes ? languageCodes : []
 
   ReactDOM.render(
     <App
