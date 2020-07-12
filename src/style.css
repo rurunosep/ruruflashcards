@@ -1,0 +1,56 @@
+body {
+  /* Nanum Gothic for Korean text */
+  font-family: 'Open Sans', 'Nanum Gothic', sans-serif;
+}
+
+.app {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.quiz {
+  width: 35%;
+  margin-right: 20px;
+}
+
+.card-display {
+  min-height: 200px;
+  background-color: #eeeeee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-controls {
+  margin-top: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tts-options {
+  margin-top: 5px;
+}
+
+.tts-options select {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.cards-list {
+  width: 35%;
+  background-color: #eeeeee;
+}
+
+.cards-list .show-hide-button {
+  margin: 5px;
+}
+
+.cards-list table {
+  width: 100%;
+}
+
+.list-controls {
+  display: flex;
+  justify-content: space-between;
+}

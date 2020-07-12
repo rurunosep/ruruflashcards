@@ -47,7 +47,6 @@ class TTS {
     }
   }
 
-  // TODO: add cache?
   static async play(text, language, voice) {
     if (!this.client) return
 

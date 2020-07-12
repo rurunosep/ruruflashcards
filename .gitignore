@@ -23,5 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 
 *.code-workspace
-public/user-auth.json
-public/owner-auth.json
+user-auth.json
+owner-auth.json
