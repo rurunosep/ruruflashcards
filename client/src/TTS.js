@@ -23,14 +23,14 @@ class TTS {
       token_uri: 'https://oauth2.googleapis.com/token',
       auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
       client_x509_cert_url:
-        'https://www.googleapis.com/robot/v1/metadata/x509/ruruflashcards-user%40ruruflashcards.iam.gserviceaccount.com',
+        'https://www.googleapis.com/robot/v1/metadata/x509/ruruflashcards-user%40ruruflashcards.iam.gserviceaccount.com'
     }
 
     try {
       const authClient = new JWT({
         email: authJSON.client_email,
         key: authJSON.private_key,
-        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
       })
 
       this.client = new TextToSpeechClient({ auth: authClient })
@@ -38,7 +38,7 @@ class TTS {
       const [response] = await this.client.listVoices()
       this.voices = response.voices
       this.languageCodes = [
-        ...new Set(this.voices.map((v) => v.languageCodes).reduce((flat, x) => [...flat, ...x])),
+        ...new Set(this.voices.map((v) => v.languageCodes).reduce((flat, x) => [...flat, ...x]))
       ].sort()
     } catch (err) {
       console.error(err)
@@ -54,8 +54,8 @@ class TTS {
       input: { text: text },
       voice: { languageCode: language, name: voice },
       audioConfig: {
-        audioEncoding: google.cloud.texttospeech.v1.AudioEncoding.MP3,
-      },
+        audioEncoding: google.cloud.texttospeech.v1.AudioEncoding.MP3
+      }
     }
 
     const [response] = await this.client.synthesizeSpeech(request)
