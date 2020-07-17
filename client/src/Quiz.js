@@ -1,24 +1,64 @@
 import React, { useState, useEffect } from 'react'
-import TTS from './TTS.js'
 
 function Quiz({ card, showNewCard, editCard }) {
+  const [voices, setVoices] = useState([])
+  const [filteredVoices, setFilteredVoices] = useState([])
   const [flipped, setFlipped] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState('en-AU')
   const [selectedVoice, setSelectedVoice] = useState()
 
-  const filteredVoices = TTS.voices
-    .filter((voice) => voice.languageCodes.includes(selectedLanguage))
-    .sort((a, b) => {
-      if (a.name < b.name) return -1
-      if (a.name > b.name) return 1
-      return 0
-    })
+  useEffect(function getVoices() {
+    fetch('http://localhost:5000/api/voices')
+      .then((res) => {
+        if (res.status === 500) {
+          throw Error(500)
+        } else {
+          return res.json()
+        }
+      })
+      .then((json) => setVoices(json))
+      .catch()
+  }, [])
 
-  useEffect(() => {
-    setSelectedVoice(filteredVoices[0])
-  }, [selectedLanguage, filteredVoices])
+  useEffect(
+    function filterVoices() {
+      const filteredVoices = voices
+        .filter((voice) => voice.languageCodes.includes(selectedLanguage))
+        .sort((a, b) => {
+          if (a.name < b.name) return -1
+          if (a.name > b.name) return 1
+          return 0
+        })
+      setFilteredVoices(filteredVoices)
+      setSelectedVoice(filteredVoices[0])
+      // eslint-disable-next-line
+    },
+    [selectedLanguage, voices]
+  )
 
   if (!card) card = { front: '', back: '' }
+
+  const playTTS = () => {
+    if (!voices) return
+
+    fetch('http://localhost:5000/api/synthesizeSpeech', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: flipped ? card.back : card.front,
+        languageCode: selectedLanguage,
+        voice: selectedVoice.name
+      })
+    })
+      .then((res) => res.blob())
+      .then((audioData) => {
+        const url = window.URL.createObjectURL(audioData)
+        const audio = new Audio(url)
+        audio.play()
+      })
+  }
 
   return (
     <div className='quiz'>
@@ -45,17 +85,12 @@ function Quiz({ card, showNewCard, editCard }) {
         >
           Disable
         </button>
-        <button
-          onClick={() =>
-            TTS.play(flipped ? card.back : card.front, selectedLanguage, selectedVoice)
-          }
-          disabled={!TTS.client}
-        >
+        <button onClick={playTTS} disabled={!voices[0]}>
           Play
         </button>
       </div>
 
-      {TTS.client && (
+      {voices[0] && (
         <TTSOptions
           filteredVoices={filteredVoices}
           selectedLanguage={selectedLanguage}
@@ -68,12 +103,36 @@ function Quiz({ card, showNewCard, editCard }) {
   )
 }
 
-function TTSOptions({ filteredVoices, selectedLanguage, selectedVoice, setLanguage, setVoice }) {
+function TTSOptions({
+  filteredVoices,
+  selectedLanguage,
+  selectedVoice,
+  setLanguage,
+  setVoice
+}) {
+  const [languageCodes, setLanguageCodes] = useState([])
+
+  useEffect(function getLanguageCodes() {
+    fetch('http://localhost:5000/api/languageCodes')
+      .then((res) => {
+        if (res.status === 500) {
+          throw Error(500)
+        } else {
+          return res.json()
+        }
+      })
+      .then((json) => setLanguageCodes(json))
+      .catch()
+  }, [])
+
   return (
     <div className='tts-options'>
       <label>Language:</label>
-      <select value={selectedLanguage} onChange={(e) => setLanguage(e.target.value)}>
-        {TTS.languageCodes.map((lang) => (
+      <select
+        value={selectedLanguage}
+        onChange={(e) => setLanguage(e.target.value)}
+      >
+        {languageCodes.map((lang) => (
           <option key={lang} value={lang}>
             {lang}
           </option>

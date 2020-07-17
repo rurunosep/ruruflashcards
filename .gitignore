@@ -1,5 +1,5 @@
 /node_modules
 /client/node_modules
 *.code-workspace
-user-auth.json
-owner-auth.json
+auth.json
+auth.json
