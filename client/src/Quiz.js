@@ -8,7 +8,7 @@ function Quiz({ card, showNewCard, editCard }) {
   const [selectedVoice, setSelectedVoice] = useState()
 
   useEffect(function getVoices() {
-    fetch('http://localhost:5000/api/voices')
+    fetch('/api/voices')
       .then((res) => {
         if (res.status === 500) {
           throw Error(500)
@@ -41,7 +41,7 @@ function Quiz({ card, showNewCard, editCard }) {
   const playTTS = () => {
     if (!voices) return
 
-    fetch('http://localhost:5000/api/synthesizeSpeech', {
+    fetch('/api/synthesizeSpeech', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -113,7 +113,7 @@ function TTSOptions({
   const [languageCodes, setLanguageCodes] = useState([])
 
   useEffect(function getLanguageCodes() {
-    fetch('http://localhost:5000/api/languageCodes')
+    fetch('/api/languageCodes')
       .then((res) => {
         if (res.status === 500) {
           throw Error(500)

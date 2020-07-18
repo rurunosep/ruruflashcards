@@ -1,20 +1,36 @@
-const KEY_FILE_LOCATION = 'D:\\Dev\\Web\\RuruFlashcards\\auth.json'
-
 const express = require('express')
+const path = require('path')
 const fs = require('fs')
-const cors = require('cors')
 const { TextToSpeechClient } = require('@google-cloud/text-to-speech')
 const MP3 = require('@google-cloud/text-to-speech/build/protos/protos').google
   .cloud.texttospeech.v1.AudioEncoding.MP3
 
 const app = express()
 app.use(express.json())
-app.use(cors())
+
+// Serve static assets
+app.use(express.static(path.join(__dirname, 'client', 'build')))
+app.get('/', (req, res) =>
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'))
+)
 
 // Initialize Text-to-Speech
 let client, voices, languageCodes
 try {
-  client = new TextToSpeechClient({ keyFilename: KEY_FILE_LOCATION })
+  const credentials = JSON.parse(
+    process.env.NODE_ENV === 'production'
+      ? process.env.GOOGLE_CLOUD_CREDENTIALS
+      : fs.readFileSync('google-cloud-credentials.json', 'utf-8')
+  )
+
+  client = new TextToSpeechClient({
+    credentials: {
+      client_email: credentials.client_email,
+      private_key: credentials.private_key
+    },
+    projectId: credentials.project_id
+  })
+
   client.listVoices().then(([response]) => {
     voices = response.voices
     languageCodes = [
@@ -59,4 +75,5 @@ app.post('/api/synthesizeSpeech', (req, res) => {
     )
 })
 
-app.listen(5000, () => console.log('Server started on port 5000'))
+const port = process.env.PORT || 5000
+app.listen(port, () => console.log(`Server started on port ${port}`))
