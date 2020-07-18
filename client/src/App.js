@@ -61,7 +61,7 @@ function App({ initialCards }) {
             cards.map((card) => ({
               ...card,
               front: card.back,
-              back: card.front,
+              back: card.front
             }))
           )
         }}
