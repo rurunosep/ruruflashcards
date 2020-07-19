@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
+import axios from 'axios'
+import { editCard } from '../redux/actions'
 
-function Quiz({ card, showNewCard, editCard }) {
+function Quiz({ cards, editCard }) {
+  const [card, setCard] = useState()
+  const [showNewCard, setShowNewCard] = useState(true)
   const [voices, setVoices] = useState([])
   const [filteredVoices, setFilteredVoices] = useState([])
   const [flipped, setFlipped] = useState(false)
@@ -8,16 +13,7 @@ function Quiz({ card, showNewCard, editCard }) {
   const [selectedVoice, setSelectedVoice] = useState()
 
   useEffect(function getVoices() {
-    fetch('/api/voices')
-      .then((res) => {
-        if (res.status === 500) {
-          throw Error(500)
-        } else {
-          return res.json()
-        }
-      })
-      .then((json) => setVoices(json))
-      .catch()
+    axios.get('/api/tts/voices').then((res) => setVoices(res.data))
   }, [])
 
   useEffect(
@@ -30,31 +26,41 @@ function Quiz({ card, showNewCard, editCard }) {
           return 0
         })
       setFilteredVoices(filteredVoices)
-      setSelectedVoice(filteredVoices[0])
+      setSelectedVoice(filteredVoices[0] ? filteredVoices[0].name : undefined)
       // eslint-disable-next-line
     },
     [selectedLanguage, voices]
   )
 
-  if (!card) card = { front: '', back: '' }
+  useEffect(
+    // TODO name
+    function _showNewCard() {
+      if (showNewCard) {
+        const enabledCards = cards.filter((card) => card.enabled)
+        const newCard = enabledCards[Math.floor(Math.random() * enabledCards.length)]
+        setCard(newCard)
+        if (newCard) setShowNewCard(false)
+      }
+    },
+    // eslint-disable-next-line
+    [showNewCard, cards]
+  )
 
   const playTTS = () => {
     if (!voices) return
 
-    fetch('/api/synthesizeSpeech', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        text: flipped ? card.back : card.front,
-        languageCode: selectedLanguage,
-        voice: selectedVoice.name
-      })
-    })
-      .then((res) => res.blob())
-      .then((audioData) => {
-        const url = window.URL.createObjectURL(audioData)
+    axios
+      .post(
+        '/api/tts/synth',
+        {
+          text: flipped ? card.back : card.front,
+          languageCode: selectedLanguage,
+          voice: selectedVoice
+        },
+        { responseType: 'blob' }
+      )
+      .then((res) => {
+        const url = window.URL.createObjectURL(res.data)
         const audio = new Audio(url)
         audio.play()
       })
@@ -63,7 +69,7 @@ function Quiz({ card, showNewCard, editCard }) {
   return (
     <div className='quiz'>
       <div className='card-display'>
-        <h1>{flipped ? card.back : card.front}</h1>
+        <h1>{card ? (flipped ? card.back : card.front) : ''}</h1>
       </div>
 
       <div className='quiz-controls'>
@@ -71,16 +77,16 @@ function Quiz({ card, showNewCard, editCard }) {
         <button
           onClick={() => {
             setFlipped(false)
-            showNewCard()
+            setShowNewCard(true)
           }}
         >
           Next
         </button>
         <button
           onClick={() => {
-            editCard({ enabled: false })
+            editCard(card._id, { enabled: false })
             setFlipped(false)
-            showNewCard()
+            setShowNewCard(true)
           }}
         >
           Disable
@@ -103,35 +109,17 @@ function Quiz({ card, showNewCard, editCard }) {
   )
 }
 
-function TTSOptions({
-  filteredVoices,
-  selectedLanguage,
-  selectedVoice,
-  setLanguage,
-  setVoice
-}) {
+function TTSOptions({ filteredVoices, selectedLanguage, selectedVoice, setLanguage, setVoice }) {
   const [languageCodes, setLanguageCodes] = useState([])
 
   useEffect(function getLanguageCodes() {
-    fetch('/api/languageCodes')
-      .then((res) => {
-        if (res.status === 500) {
-          throw Error(500)
-        } else {
-          return res.json()
-        }
-      })
-      .then((json) => setLanguageCodes(json))
-      .catch()
+    axios.get('/api/tts/langs').then((res) => setLanguageCodes(res.data))
   }, [])
 
   return (
     <div className='tts-options'>
       <label>Language:</label>
-      <select
-        value={selectedLanguage}
-        onChange={(e) => setLanguage(e.target.value)}
-      >
+      <select value={selectedLanguage} onChange={(e) => setLanguage(e.target.value)}>
         {languageCodes.map((lang) => (
           <option key={lang} value={lang}>
             {lang}
@@ -151,4 +139,8 @@ function TTSOptions({
   )
 }
 
-export default Quiz
+const stateToProps = (state) => ({
+  cards: state.cards
+})
+
+export default connect(stateToProps, { editCard })(Quiz)

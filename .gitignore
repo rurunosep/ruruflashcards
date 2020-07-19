@@ -2,4 +2,4 @@
 /client/node_modules
 /client/build
 ws.code-workspace
-google-cloud-credentials.json
+keys.js

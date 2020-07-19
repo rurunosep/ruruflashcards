@@ -1,19 +1,16 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { v4 as uuid } from 'uuid'
-import App from './App.js'
+import { Provider } from 'react-redux'
+import store from './redux/store'
+import { loadCards } from './redux/actions'
+import App from './components/App'
 import './style.css'
 
-let initialCards = JSON.parse(localStorage.getItem('cards'))
-if (!initialCards) {
-  initialCards = [
-    { front: '개', back: 'Dog', id: uuid(), enabled: true },
-    { front: '고양이', back: 'Cat', id: uuid(), enabled: true },
-    { front: '물고기', back: 'Fish', id: uuid(), enabled: true }
-  ]
-}
+store.dispatch(loadCards())
 
 ReactDOM.render(
-  <App initialCards={initialCards} />,
+  <Provider store={store}>
+    <App />
+  </Provider>,
   document.getElementById('root')
 )
