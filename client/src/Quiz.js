@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 
 function Quiz({ card, showNewCard, editCard }) {
   const [voices, setVoices] = useState([])
@@ -8,16 +9,7 @@ function Quiz({ card, showNewCard, editCard }) {
   const [selectedVoice, setSelectedVoice] = useState()
 
   useEffect(function getVoices() {
-    fetch('/api/voices')
-      .then((res) => {
-        if (res.status === 500) {
-          throw Error(500)
-        } else {
-          return res.json()
-        }
-      })
-      .then((json) => setVoices(json))
-      .catch()
+    axios.get('/api/tts/voices').then((res) => setVoices(res.data))
   }, [])
 
   useEffect(
@@ -30,7 +22,7 @@ function Quiz({ card, showNewCard, editCard }) {
           return 0
         })
       setFilteredVoices(filteredVoices)
-      setSelectedVoice(filteredVoices[0])
+      setSelectedVoice(filteredVoices[0] ? filteredVoices[0].name : undefined)
       // eslint-disable-next-line
     },
     [selectedLanguage, voices]
@@ -41,20 +33,18 @@ function Quiz({ card, showNewCard, editCard }) {
   const playTTS = () => {
     if (!voices) return
 
-    fetch('/api/synthesizeSpeech', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        text: flipped ? card.back : card.front,
-        languageCode: selectedLanguage,
-        voice: selectedVoice.name
-      })
-    })
-      .then((res) => res.blob())
-      .then((audioData) => {
-        const url = window.URL.createObjectURL(audioData)
+    axios
+      .post(
+        '/api/tts/synth',
+        {
+          text: flipped ? card.back : card.front,
+          languageCode: selectedLanguage,
+          voice: selectedVoice
+        },
+        { responseType: 'blob' }
+      )
+      .then((res) => {
+        const url = window.URL.createObjectURL(res.data)
         const audio = new Audio(url)
         audio.play()
       })
@@ -113,16 +103,7 @@ function TTSOptions({
   const [languageCodes, setLanguageCodes] = useState([])
 
   useEffect(function getLanguageCodes() {
-    fetch('/api/languageCodes')
-      .then((res) => {
-        if (res.status === 500) {
-          throw Error(500)
-        } else {
-          return res.json()
-        }
-      })
-      .then((json) => setLanguageCodes(json))
-      .catch()
+    axios.get('/api/tts/langs').then((res) => setLanguageCodes(res.data))
   }, [])
 
   return (
