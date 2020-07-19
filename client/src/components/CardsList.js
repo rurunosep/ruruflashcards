@@ -1,6 +1,23 @@
 import React, { useState } from 'react'
+import { connect } from 'react-redux'
+import {
+  addCard,
+  editCard,
+  deleteCard,
+  enableAllCards,
+  disableAllCards,
+  swapAllFields
+} from '../redux/actions'
 
-function CardsList({ cards, addCard, editCard, deleteCard, setAllCardsEnabled, swapAllFields }) {
+function CardsList({
+  cards,
+  addCard,
+  editCard,
+  deleteCard,
+  enableAllCards,
+  disableAllCards,
+  swapAllFields
+}) {
   const [addingCard, setAddingCard] = useState(false)
   const [listVisible, setListVisible] = useState(true)
 
@@ -22,11 +39,11 @@ function CardsList({ cards, addCard, editCard, deleteCard, setAllCardsEnabled, s
             </thead>
 
             <tbody>
-              {cards.map((card, index) => (
+              {cards.map((card) => (
                 <CardsListRow
                   card={card}
-                  editCard={(changes) => editCard(index, changes)}
-                  deleteCard={() => deleteCard(index)}
+                  editCard={editCard}
+                  deleteCard={deleteCard}
                   key={card.id}
                 />
               ))}
@@ -34,8 +51,8 @@ function CardsList({ cards, addCard, editCard, deleteCard, setAllCardsEnabled, s
           </table>
           {addingCard ? (
             <AddCardForm
-              addCard={(fields) => {
-                addCard(fields)
+              addCard={(front, back) => {
+                addCard(front, back)
                 setAddingCard(false)
               }}
             />
@@ -45,8 +62,8 @@ function CardsList({ cards, addCard, editCard, deleteCard, setAllCardsEnabled, s
             </div>
           )}
           <div className='list-controls'>
-            <button onClick={() => setAllCardsEnabled(true)}>Enable All</button>
-            <button onClick={() => setAllCardsEnabled(false)}>Disable All</button>
+            <button onClick={enableAllCards}>Enable All</button>
+            <button onClick={disableAllCards}>Disable All</button>
             <button onClick={swapAllFields}>Swap Fields</button>
           </div>
         </>
@@ -62,8 +79,8 @@ function CardsListRow({ card, editCard, deleteCard }) {
     <EditableCardListRow
       card={card}
       editCard={editCard}
-      deleteCard={() => {
-        deleteCard()
+      deleteCard={(id) => {
+        deleteCard(id)
         setEditable(false)
       }}
       setUneditable={() => setEditable(false)}
@@ -78,7 +95,7 @@ function CardsListRow({ card, editCard, deleteCard }) {
         <input
           type='checkbox'
           checked={card.enabled}
-          onChange={(e) => editCard({ enabled: e.target.checked })}
+          onChange={(e) => editCard(card.id, { enabled: e.target.checked })}
         />
       </td>
       {row}
@@ -89,26 +106,22 @@ function CardsListRow({ card, editCard, deleteCard }) {
 function EditableCardListRow({ card, editCard, deleteCard, setUneditable }) {
   const [fields, setFields] = useState({ front: card.front, back: card.back })
 
+  const onChange = (e) => {
+    setFields({ ...fields, [e.target.name]: e.target.value })
+  }
+
   return (
     <>
       <td>
-        <input
-          type='text'
-          value={fields.front}
-          onChange={(e) => setFields({ ...fields, front: e.target.value })}
-        />
+        <input type='text' name='front' value={fields.front} onChange={onChange} />
       </td>
       <td>
-        <input
-          type='text'
-          value={fields.back}
-          onChange={(e) => setFields({ ...fields, back: e.target.value })}
-        />
+        <input type='text' name='back' value={fields.back} onChange={onChange} />
       </td>
       <td>
         <button
           onClick={() => {
-            editCard(fields)
+            editCard(card.id, { ...fields })
             setUneditable()
           }}
         >
@@ -116,7 +129,7 @@ function EditableCardListRow({ card, editCard, deleteCard, setUneditable }) {
         </button>
       </td>
       <td>
-        <button onClick={deleteCard}>Delete</button>
+        <button onClick={() => deleteCard(card.id)}>Delete</button>
       </td>
     </>
   )
@@ -137,9 +150,13 @@ function UneditableCardListRow({ card, setEditable }) {
 function AddCardForm({ addCard }) {
   const [fields, setFields] = useState({ front: '', back: '' })
 
+  const onChange = (e) => {
+    setFields({ ...fields, [e.target.name]: e.target.value })
+  }
+
   const onSubmit = (e) => {
     e.preventDefault()
-    addCard(fields)
+    addCard(fields.front, fields.back)
     setFields({ front: '', back: '' })
   }
 
@@ -147,19 +164,26 @@ function AddCardForm({ addCard }) {
     <form onSubmit={onSubmit}>
       <input
         type='text'
+        name='front'
         placeholder='Front'
         value={fields.front}
-        onChange={(e) => setFields({ ...fields, front: e.target.value })}
+        onChange={onChange}
       />
-      <input
-        type='text'
-        placeholder='Back'
-        value={fields.back}
-        onChange={(e) => setFields({ ...fields, back: e.target.value })}
-      />
+      <input type='text' name='back' placeholder='Back' value={fields.back} onChange={onChange} />
       <input type='submit' value='Add Card' />
     </form>
   )
 }
 
-export default CardsList
+const stateToProps = (state) => ({
+  cards: state.cards
+})
+
+export default connect(stateToProps, {
+  addCard,
+  editCard,
+  deleteCard,
+  enableAllCards,
+  disableAllCards,
+  swapAllFields
+})(CardsList)

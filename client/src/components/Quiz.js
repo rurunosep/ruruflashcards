@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import axios from 'axios'
+import { editCard } from '../redux/actions'
 
-function Quiz({ card, showNewCard, editCard }) {
+function Quiz({ cards, editCard }) {
+  const [card, setCard] = useState()
+  const [showNewCard, setShowNewCard] = useState(true)
   const [voices, setVoices] = useState([])
   const [filteredVoices, setFilteredVoices] = useState([])
   const [flipped, setFlipped] = useState(false)
@@ -28,7 +32,17 @@ function Quiz({ card, showNewCard, editCard }) {
     [selectedLanguage, voices]
   )
 
-  if (!card) card = { front: '', back: '' }
+  useEffect(
+    function showNewCard() {
+      if (showNewCard) {
+        const enabledCards = cards.filter((card) => card.enabled)
+        setCard(enabledCards[Math.floor(Math.random() * enabledCards.length)])
+        setShowNewCard(false)
+      }
+    },
+    // eslint-disable-next-line
+    [showNewCard]
+  )
 
   const playTTS = () => {
     if (!voices) return
@@ -53,7 +67,7 @@ function Quiz({ card, showNewCard, editCard }) {
   return (
     <div className='quiz'>
       <div className='card-display'>
-        <h1>{flipped ? card.back : card.front}</h1>
+        <h1>{card ? (flipped ? card.back : card.front) : ''}</h1>
       </div>
 
       <div className='quiz-controls'>
@@ -61,16 +75,16 @@ function Quiz({ card, showNewCard, editCard }) {
         <button
           onClick={() => {
             setFlipped(false)
-            showNewCard()
+            setShowNewCard(true)
           }}
         >
           Next
         </button>
         <button
           onClick={() => {
-            editCard({ enabled: false })
+            editCard(card.id, { enabled: false })
             setFlipped(false)
-            showNewCard()
+            setShowNewCard(true)
           }}
         >
           Disable
@@ -93,13 +107,7 @@ function Quiz({ card, showNewCard, editCard }) {
   )
 }
 
-function TTSOptions({
-  filteredVoices,
-  selectedLanguage,
-  selectedVoice,
-  setLanguage,
-  setVoice
-}) {
+function TTSOptions({ filteredVoices, selectedLanguage, selectedVoice, setLanguage, setVoice }) {
   const [languageCodes, setLanguageCodes] = useState([])
 
   useEffect(function getLanguageCodes() {
@@ -109,10 +117,7 @@ function TTSOptions({
   return (
     <div className='tts-options'>
       <label>Language:</label>
-      <select
-        value={selectedLanguage}
-        onChange={(e) => setLanguage(e.target.value)}
-      >
+      <select value={selectedLanguage} onChange={(e) => setLanguage(e.target.value)}>
         {languageCodes.map((lang) => (
           <option key={lang} value={lang}>
             {lang}
@@ -132,4 +137,8 @@ function TTSOptions({
   )
 }
 
-export default Quiz
+const stateToProps = (state) => ({
+  cards: state.cards
+})
+
+export default connect(stateToProps, { editCard })(Quiz)

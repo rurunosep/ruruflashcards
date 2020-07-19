@@ -8,7 +8,11 @@ const app = express()
 app.use(express.json())
 
 // Connect to MongoDB
-const mongo = new MongoClient(require('./keys').MONGODB_URI, {
+const uri =
+  process.env.NODE_ENV === 'production'
+    ? process.env.MONGODB_URI
+    : require('./keys').MONGODB_URI
+const mongo = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
