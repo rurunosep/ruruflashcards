@@ -35,16 +35,13 @@ router.post('/', (req, res) => {
 // Edit card
 router.put('/:id', (req, res) => {
   const { mongo } = req._params
-  const { front, back, enabled } = req.body
+  const changes = req.body
 
   if (mongo.isConnected()) {
     mongo
       .db('ruruflashcards')
       .collection('card')
-      .updateOne(
-        { _id: ObjectId(req.params.id) },
-        { $set: { front, back, enabled } }
-      )
+      .updateOne({ _id: ObjectId(req.params.id) }, { $set: changes })
       .then(() => res.send())
   } else {
     res.status(500).send('Mongo error')

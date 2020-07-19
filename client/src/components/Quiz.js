@@ -33,15 +33,17 @@ function Quiz({ cards, editCard }) {
   )
 
   useEffect(
-    function showNewCard() {
+    // TODO name
+    function _showNewCard() {
       if (showNewCard) {
         const enabledCards = cards.filter((card) => card.enabled)
-        setCard(enabledCards[Math.floor(Math.random() * enabledCards.length)])
-        setShowNewCard(false)
+        const newCard = enabledCards[Math.floor(Math.random() * enabledCards.length)]
+        setCard(newCard)
+        if (newCard) setShowNewCard(false)
       }
     },
     // eslint-disable-next-line
-    [showNewCard]
+    [showNewCard, cards]
   )
 
   const playTTS = () => {
@@ -82,7 +84,7 @@ function Quiz({ cards, editCard }) {
         </button>
         <button
           onClick={() => {
-            editCard(card.id, { enabled: false })
+            editCard(card._id, { enabled: false })
             setFlipped(false)
             setShowNewCard(true)
           }}

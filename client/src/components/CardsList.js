@@ -44,7 +44,7 @@ function CardsList({
                   card={card}
                   editCard={editCard}
                   deleteCard={deleteCard}
-                  key={card.id}
+                  key={card._id}
                 />
               ))}
             </tbody>
@@ -62,9 +62,15 @@ function CardsList({
             </div>
           )}
           <div className='list-controls'>
-            <button onClick={enableAllCards}>Enable All</button>
-            <button onClick={disableAllCards}>Disable All</button>
-            <button onClick={swapAllFields}>Swap Fields</button>
+            <button onClick={enableAllCards} disabled={true}>
+              Enable All
+            </button>
+            <button onClick={disableAllCards} disabled={true}>
+              Disable All
+            </button>
+            <button onClick={swapAllFields} disabled={true}>
+              Swap Fields
+            </button>
           </div>
         </>
       )}
@@ -79,8 +85,8 @@ function CardsListRow({ card, editCard, deleteCard }) {
     <EditableCardListRow
       card={card}
       editCard={editCard}
-      deleteCard={(id) => {
-        deleteCard(id)
+      deleteCard={(_id) => {
+        deleteCard(_id)
         setEditable(false)
       }}
       setUneditable={() => setEditable(false)}
@@ -95,7 +101,7 @@ function CardsListRow({ card, editCard, deleteCard }) {
         <input
           type='checkbox'
           checked={card.enabled}
-          onChange={(e) => editCard(card.id, { enabled: e.target.checked })}
+          onChange={(e) => editCard(card._id, { enabled: e.target.checked })}
         />
       </td>
       {row}
@@ -121,7 +127,7 @@ function EditableCardListRow({ card, editCard, deleteCard, setUneditable }) {
       <td>
         <button
           onClick={() => {
-            editCard(card.id, { ...fields })
+            editCard(card._id, { ...fields })
             setUneditable()
           }}
         >
@@ -129,7 +135,7 @@ function EditableCardListRow({ card, editCard, deleteCard, setUneditable }) {
         </button>
       </td>
       <td>
-        <button onClick={() => deleteCard(card.id)}>Delete</button>
+        <button onClick={() => deleteCard(card._id)}>Delete</button>
       </td>
     </>
   )
