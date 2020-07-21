@@ -1,211 +1,169 @@
 [
   {
     "front": "개",
-    "back": "Dog",
-    "enabled": true
+    "back": "Dog"
   },
   {
     "front": "고양이",
-    "back": "Cat",
-    "enabled": true
+    "back": "Cat"
   },
   {
     "front": "물고기",
-    "back": "Fish",
-    "enabled": true
+    "back": "Fish"
   },
   {
-    "enabled": true,
     "front": "새",
     "back": "Bird"
   },
   {
-    "enabled": true,
     "front": "말",
     "back": "Horse"
   },
   {
-    "enabled": true,
     "front": "쥐",
     "back": "Mouse"
   },
   {
-    "enabled": true,
     "front": "기린",
     "back": "Giraffe"
   },
   {
-    "enabled": true,
     "front": "소",
     "back": "Cow"
   },
   {
-    "enabled": true,
     "front": "원숭이",
     "back": "Monkey"
   },
   {
-    "enabled": true,
     "front": "돼지",
     "back": "Pig"
   },
   {
-    "enabled": true,
     "front": "토끼",
     "back": "Rabbit"
   },
   {
-    "enabled": true,
     "front": "뱀",
     "back": "Snake"
   },
   {
-    "enabled": true,
     "front": "코끼리",
     "back": "Elephant"
   },
   {
-    "enabled": true,
     "front": "닭",
     "back": "Chicken"
   },
   {
-    "enabled": true,
     "front": "강아지",
     "back": "Puppy"
   },
   {
-    "enabled": true,
     "front": "염소",
     "back": "Goat"
   },
   {
-    "enabled": true,
     "front": "양",
     "back": "Sheep"
   },
   {
-    "enabled": true,
     "front": "나비",
     "back": "Butterfly"
   },
   {
-    "enabled": true,
     "front": "게",
     "back": "Crab"
   },
   {
-    "enabled": true,
     "front": "늑대",
     "back": "Wolf"
   },
   {
-    "enabled": true,
     "front": "사슴",
     "back": "Deer"
   },
   {
-    "enabled": true,
     "front": "곰",
     "back": "Bear"
   },
   {
-    "enabled": true,
     "front": "여우",
     "back": "Fox"
   },
   {
-    "enabled": true,
     "front": "너구리",
     "back": "Raccoon"
   },
   {
-    "enabled": true,
     "front": "거북이",
     "back": "Turtle"
   },
   {
-    "enabled": true,
     "front": "개구리",
     "back": "Frog"
   },
   {
-    "enabled": true,
     "front": "상어",
     "back": "Shark"
   },
   {
-    "enabled": true,
     "front": "악어",
     "back": "Crocodile"
   },
   {
-    "enabled": true,
     "front": "고래",
     "back": "Whale"
   },
   {
-    "enabled": true,
     "front": "문어",
     "back": "Octopus"
   },
   {
-    "enabled": true,
     "front": "오징어",
     "back": "Squid"
   },
   {
-    "enabled": true,
     "front": "장어",
     "back": "Eel"
   },
   {
-    "enabled": true,
     "front": "앵무새",
     "back": "Parrot"
   },
   {
-    "enabled": true,
     "front": "까마귀",
     "back": "Crow"
   },
   {
-    "enabled": true,
     "front": "비둘기",
     "back": "Dove"
   },
   {
-    "enabled": true,
     "front": "매",
     "back": "Hawk"
   },
   {
-    "enabled": true,
     "front": "사자",
     "back": "Lion"
   },
   {
-    "enabled": true,
     "front": "호랑이",
     "back": "Tiger"
   },
   {
-    "enabled": true,
     "front": "도마뱀",
     "back": "Lizard"
   },
   {
-    "enabled": true,
     "front": "개미",
     "back": "Ant"
   },
   {
-    "enabled": true,
     "front": "달팽이",
     "back": "Snail"
   },
   {
-    "enabled": true,
     "front": "모기",
     "back": "Mosquito"
   }

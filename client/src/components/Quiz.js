@@ -12,39 +12,35 @@ function Quiz({ cards, editCard }) {
   const [selectedLanguage, setSelectedLanguage] = useState('en-AU')
   const [selectedVoice, setSelectedVoice] = useState()
 
-  useEffect(function getVoices() {
+  // Get voices
+  useEffect(() => {
     axios.get('/api/tts/voices').then((res) => setVoices(res.data))
   }, [])
 
-  useEffect(
-    function filterVoices() {
-      const filteredVoices = voices
-        .filter((voice) => voice.languageCodes.includes(selectedLanguage))
-        .sort((a, b) => {
-          if (a.name < b.name) return -1
-          if (a.name > b.name) return 1
-          return 0
-        })
-      setFilteredVoices(filteredVoices)
-      setSelectedVoice(filteredVoices[0] ? filteredVoices[0].name : undefined)
-      // eslint-disable-next-line
-    },
-    [selectedLanguage, voices]
-  )
-
-  useEffect(
-    // TODO name
-    function _showNewCard() {
-      if (showNewCard) {
-        const enabledCards = cards.filter((card) => card.enabled)
-        const newCard = enabledCards[Math.floor(Math.random() * enabledCards.length)]
-        setCard(newCard)
-        if (newCard) setShowNewCard(false)
-      }
-    },
+  // Filter voices
+  useEffect(() => {
+    const filteredVoices = voices
+      .filter((voice) => voice.languageCodes.includes(selectedLanguage))
+      .sort((a, b) => {
+        if (a.name < b.name) return -1
+        if (a.name > b.name) return 1
+        return 0
+      })
+    setFilteredVoices(filteredVoices)
+    setSelectedVoice(filteredVoices[0] ? filteredVoices[0].name : undefined)
     // eslint-disable-next-line
-    [showNewCard, cards]
-  )
+  }, [selectedLanguage, voices])
+
+  // Show new card
+  useEffect(() => {
+    if (showNewCard) {
+      const enabledCards = cards.filter((card) => card.enabled)
+      const newCard = enabledCards[Math.floor(Math.random() * enabledCards.length)]
+      setCard(newCard)
+      if (newCard) setShowNewCard(false)
+    }
+    // eslint-disable-next-line
+  }, [showNewCard, cards])
 
   const playTTS = () => {
     if (!voices) return
@@ -112,7 +108,8 @@ function Quiz({ cards, editCard }) {
 function TTSOptions({ filteredVoices, selectedLanguage, selectedVoice, setLanguage, setVoice }) {
   const [languageCodes, setLanguageCodes] = useState([])
 
-  useEffect(function getLanguageCodes() {
+  // Get language codes
+  useEffect(() => {
     axios.get('/api/tts/langs').then((res) => setLanguageCodes(res.data))
   }, [])
 
