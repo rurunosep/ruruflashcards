@@ -43,6 +43,7 @@ export const login = (username, password) => (dispatch) => {
       type: 'LOGIN_USER',
       username
     })
+    dispatch(loadCards())
   })
 }
 
@@ -55,19 +56,22 @@ export const register = (username, password) => (dispatch) => {
   })
 }
 
+export const logout = () => (dispatch) => {
+  axios.get('api/auth/logout').then((res) => {
+    dispatch({
+      type: 'LOGOUT_USER'
+    })
+    dispatch({
+      type: 'CLEAR_CARDS'
+    })
+  })
+}
+
 export const getUser = () => (dispatch) => {
   axios.get('api/auth/user').then((res) => {
     dispatch({
       type: 'GET_USER',
       username: res.data ? res.data : null
-    })
-  })
-}
-
-export const logout = () => (dispatch) => {
-  axios.get('api/auth/logout').then((res) => {
-    dispatch({
-      type: 'LOGOUT_USER'
     })
   })
 }

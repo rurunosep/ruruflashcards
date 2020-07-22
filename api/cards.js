@@ -3,80 +3,108 @@ const router = express.Router()
 const { ObjectId } = require('mongodb')
 
 // GET api/cards
-// Get all cards
-router.get('/', (req, res) => {
+// Get all cards in deck of current user
+router.get('/', async (req, res) => {
   const { mongo } = req.locals
+
   if (!mongo.isConnected) return res.status(500).send('Mongo error')
-  mongo
+  if (!req.user) return res.status(401).send('No user logged in')
+
+  const deck = await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .findOne({ _id: req.user.deck_ids[0] })
+
+  const cards = await mongo
     .db('ruruflashcards')
     .collection('cards')
-    .find({})
+    .find({ _id: { $in: deck.card_ids } })
     .toArray()
-    .then((cards) => res.send(cards))
+
+  res.send(cards)
 })
 
 // POST api/cards
-// Add card
+// Add card to deck of current user
 // body: {front, back}
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { mongo } = req.locals
   const { front, back } = req.body
+
   if (typeof front !== 'string' || typeof back !== 'string') return res.status(400).send()
   if (!mongo.isConnected) return res.status(500).send('Mongo error')
-  mongo
+  if (!req.user) return res.status(401).send('No user logged in')
+
+  const { insertedId: newCardId } = await mongo
     .db('ruruflashcards')
     .collection('cards')
     .insertOne({ front, back, enabled: true })
-    .then((result) => res.status(201).send({ _id: result.insertedId }))
+
+  await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .updateOne({ _id: req.user.deck_ids[0] }, { $push: { card_ids: ObjectId(newCardId) } })
+
+  res.status(201).send(newCardId)
 })
 
 // PUT api/cards/:id
-// Edit card
+// Edit card in deck of current user
 // body: {front?, back?, enabled?}
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const { mongo } = req.locals
-  const changes = req.body
+  const { front, back, enabled } = req.body
+  const { id: cardId } = req.params
+
   if (!mongo.isConnected) return res.status(500).send('Mongo error')
-  mongo
+  if (!req.user) return res.status(401).send('No user logged in')
+
+  const deck = await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .findOne({
+      _id: req.user.deck_ids[0],
+      card_ids: ObjectId(cardId) // TODO this explodes if cardId is wrong format
+    })
+  if (!deck) return res.status(400).send(`User does not own card of id: ${cardId}`)
+
+  let changes = {}
+  if (typeof front === 'string') changes.front = front
+  if (typeof back === 'string') changes.back = back
+  if (typeof enabled === 'boolean') changes.enabled = enabled
+
+  await mongo
     .db('ruruflashcards')
     .collection('cards')
-    .updateOne({ _id: ObjectId(req.params.id) }, { $set: changes })
-    .then((result) => {
-      if (result.result.nModified === 0)
-        return res.status(400).send(`No card of _id: ${req.params.id}`)
-      res.status(204).send()
-    })
+    .updateOne({ _id: ObjectId(cardId) }, { $set: changes }) // TODO above
+
+  res.status(204).send()
 })
 
 // DELETE api/cards/:id
 // Delete card
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const { mongo } = req.locals
-  if (!mongo.isConnected) return res.status(500).send('Mongo error')
-  mongo
-    .db('ruruflashcards')
-    .collection('cards')
-    .deleteOne({ _id: ObjectId(req.params.id) })
-    .then((result) => {
-      if (result.result.nModified === 0)
-        return res.status(400).send(`No card of _id: ${req.params.id}`)
-      res.status(204).send()
-    })
-})
+  const { id: cardId } = req.params
 
-// GET api/cards/:id
-// Get single card
-router.get('/:id', (req, res) => {
-  const { mongo } = req.locals
   if (!mongo.isConnected) return res.status(500).send('Mongo error')
-  mongo
+  if (!req.user) return res.status(401).send('No user logged in')
+
+  const deck = await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .findOne({
+      _id: req.user.deck_ids[0],
+      card_ids: ObjectId(cardId) // TODO above
+    })
+  if (!deck) return res.status(400).send(`User does not own card of id: ${cardId}`)
+
+  await mongo
     .db('ruruflashcards')
     .collection('cards')
-    .findOne({ _id: ObjectId(req.params.id) })
-    .then((card) => {
-      if (!card) return res.status(400).send(`No card of _id: ${req.params.id}`)
-      res.send(card)
-    })
+    .deleteOne({ _id: ObjectId(req.params.id) }) // TODO above
+
+  res.status(204).send()
 })
 
 module.exports = router

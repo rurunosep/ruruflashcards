@@ -12,6 +12,15 @@ function Quiz({ cards, editCard }) {
   const [selectedLanguage, setSelectedLanguage] = useState('en-AU')
   const [selectedVoice, setSelectedVoice] = useState()
 
+  // TODO component should get card from state so that when cards are cleared, the displayed card is, too
+  // Also, new displayed card should be chosen when cards are loaded
+  // This is just a bandaid
+  useEffect(() => {
+    if (!cards.includes[card]) setCard(undefined)
+    if (!card) setShowNewCard(true)
+    // eslint-disable-next-line
+  }, [cards])
+
   // Get voices
   useEffect(() => {
     axios.get('/api/tts/voices').then((res) => setVoices(res.data))

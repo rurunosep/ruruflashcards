@@ -11,6 +11,12 @@ export default function reducer(state = initialState, action) {
         cards: action.cards
       }
 
+    case 'CLEAR_CARDS':
+      return {
+        ...state,
+        cards: []
+      }
+
     case 'ADD_CARD':
       return {
         ...state,

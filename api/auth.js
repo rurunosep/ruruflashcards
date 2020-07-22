@@ -27,14 +27,25 @@ router.get('/user', (req, res) => {
 router.post('/register', async (req, res) => {
   const { mongo } = req.locals
   const { username, password } = req.body
+
+  if (!username || !password) return res.status(400).send()
   if (!mongo.isConnected) return res.status(500).send('Mongo error')
 
   if (await mongo.db('ruruflashcards').collection('users').findOne({ username }))
     return res.status(400).send('User already exists')
 
+  const { insertedId: defaultDeckId } = await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .insertOne({
+      name: 'Default',
+      card_ids: []
+    })
+
   const salt = await bcrypt.genSalt()
   const password_hash = await bcrypt.hash(password, salt)
-  const user = { username, password_hash, deck_ids: [] }
+
+  const user = { username, password_hash, deck_ids: [defaultDeckId] }
   await mongo.db('ruruflashcards').collection('users').insertOne(user)
 
   req.logIn(user, () => {
