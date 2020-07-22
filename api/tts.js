@@ -3,7 +3,8 @@ const router = express.Router()
 const MP3 = require('@google-cloud/text-to-speech/build/protos/protos').google.cloud.texttospeech.v1
   .AudioEncoding.MP3
 
-// Get voices
+// GET api/tts/voices
+// Get Google TTS voices
 router.get('/voices', (req, res) => {
   if (req.locals.voices) {
     res.send(req.locals.voices)
@@ -12,7 +13,8 @@ router.get('/voices', (req, res) => {
   }
 })
 
-// Get language codes
+// GET api/tts/langs
+// Get Google TTS language codes
 router.get('/langs', (req, res) => {
   if (req.locals.languageCodes) {
     res.send(req.locals.languageCodes)
@@ -21,8 +23,11 @@ router.get('/langs', (req, res) => {
   }
 })
 
+// POST api/tts/synth
 // Synthesize speech
+// body: {text, languageCode, voice}
 router.post('/synth', (req, res) => {
+  // TODO check for errors
   const request = {
     input: { text: req.body.text },
     voice: { languageCode: req.body.languageCode, name: req.body.voice },
