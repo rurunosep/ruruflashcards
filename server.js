@@ -9,6 +9,13 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcryptjs')
 
+// Load environment variables from config.js
+if (process.env.NODE_ENV !== 'production') {
+  Object.entries(require('./config')).map(([k, v]) => {
+    process.env[k] = v
+  })
+}
+
 let mongo, ttsClient, voices, languageCodes
 
 const app = express()
@@ -18,47 +25,23 @@ initMongoDB()
 initTTS()
 app.use(
   session({
-    secret:
-      process.env.NODE_ENV === 'production'
-        ? process.env.SESSION_SECRET
-        : require('./keys').SESSION_SECRET,
+    secret: process.env.SESSION_SECRET,
     store: new MongoStore({ client: mongo }),
-    resave: false, // I don't know what these do
-    saveUninitialized: true // ---
+    resave: false,
+    saveUninitialized: true
   })
 )
 initPassport()
 
-// TODO maybe create a middleware that just puts all locals into all requests?
-// Route to TTS api
-app.use(
-  '/api/tts',
-  (req, res, next) => {
-    req.locals = { ...req.locals, ttsClient, voices, languageCodes }
-    next()
-  },
-  require('./api/tts')
-)
+app.use((req, res, next) => {
+  req.locals = { ...req.locals, ttsClient, voices, languageCodes, mongo, passport }
+  next()
+})
 
-// Route to cards api
-app.use(
-  '/api/cards',
-  (req, res, next) => {
-    req.locals = { ...req.locals, mongo }
-    next()
-  },
-  require('./api/cards')
-)
-
-// Route to auth api
-app.use(
-  '/api/auth',
-  (req, res, next) => {
-    req.locals = { ...req.locals, mongo, passport }
-    next()
-  },
-  require('./api/auth')
-)
+// Routes
+app.use('/api/tts', require('./api/tts'))
+app.use('/api/cards', require('./api/cards'))
+app.use('/api/auth', require('./api/auth'))
 
 // Start server
 const port = process.env.PORT || 5000
@@ -66,8 +49,7 @@ app.listen(port, () => console.log(`Server started on port ${port}`))
 
 // --------------------
 function initMongoDB() {
-  const uri =
-    process.env.NODE_ENV === 'production' ? process.env.MONGODB_URI : require('./keys').MONGODB_URI
+  const uri = process.env.MONGODB_URI
   mongo = new MongoClient(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -80,11 +62,7 @@ function initMongoDB() {
 
 function initTTS() {
   try {
-    const credentials =
-      process.env.NODE_ENV === 'production'
-        ? JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS)
-        : require('./keys').GOOGLE_CLOUD_CREDENTIALS
-
+    const credentials = JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS)
     ttsClient = new TextToSpeechClient({
       credentials: {
         client_email: credentials.client_email,
@@ -113,7 +91,7 @@ function initPassport() {
       try {
         if (!mongo.isConnected) throw 'Mongo error'
 
-        const user = await mongo.db('ruruflashcards').collection('user').findOne({ username })
+        const user = await mongo.db('ruruflashcards').collection('users').findOne({ username })
         if (!user) return done(null, false)
 
         const isMatch = await bcrypt.compare(password, user.password_hash)
@@ -134,7 +112,7 @@ function initPassport() {
     if (!mongo.isConnected) return done('Mongo error')
     mongo
       .db('ruruflashcards')
-      .collection('user')
+      .collection('users')
       .findOne({ username })
       .then((user) => {
         if (!user) return done(null, false)

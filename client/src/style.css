@@ -49,8 +49,3 @@ body {
 .cards-list table {
   width: 100%;
 }
-
-.list-controls {
-  display: flex;
-  justify-content: space-between;
-}

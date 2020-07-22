@@ -1,14 +1,27 @@
-import React from 'react'
-import CardsList from './CardsList.js'
-import Quiz from './Quiz.js'
+import React, { useEffect } from 'react'
+import { connect } from 'react-redux'
+import { loadCards, getUser } from '../redux/actions'
+import LoginLogoutRegister from './LoginLogoutRegister'
+import CardsList from './CardsList'
+import Quiz from './Quiz'
 
-function App() {
+function App({ loadCards, getUser }) {
+  // Get authenticated user of current session and load their cards
+  useEffect(() => {
+    loadCards()
+    getUser()
+    // eslint-disable-next-line
+  }, [])
+
   return (
-    <div className='app'>
-      <Quiz />
-      <CardsList />
-    </div>
+    <>
+      <LoginLogoutRegister />
+      <div className='app'>
+        <Quiz />
+        <CardsList />
+      </div>
+    </>
   )
 }
 
-export default App
+export default connect(null, { loadCards, getUser })(App)

@@ -2,4 +2,4 @@
 /client/node_modules
 /client/build
 ws.code-workspace
-keys.js
+config.js

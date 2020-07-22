@@ -6,10 +6,7 @@ const enhancers = compose(
   applyMiddleware(thunk),
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
-const store = createStore(reducer, enhancers)
 
-store.subscribe(() => {
-  localStorage.setItem('cards', JSON.stringify(store.getState().cards))
-})
+const store = createStore(reducer, enhancers)
 
 export default store

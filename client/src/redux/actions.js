@@ -37,23 +37,37 @@ export const deleteCard = (_id) => (dispatch) => {
   )
 }
 
-// TODO make an api endpoint
-export const enableAllCards = () => (dispatch) => {
-  return {
-    type: 'ENABLE_ALL_CARDS'
-  }
+export const login = (username, password) => (dispatch) => {
+  axios.post('api/auth/login', { username, password }).then((res) => {
+    dispatch({
+      type: 'LOGIN_USER',
+      username
+    })
+  })
 }
 
-// TODO make an api endpoint
-export const disableAllCards = () => {
-  return {
-    type: 'DISABLE_ALL_CARDS'
-  }
+export const register = (username, password) => (dispatch) => {
+  axios.post('api/auth/register', { username, password }).then((res) => {
+    dispatch({
+      type: 'REGISTER_USER',
+      username
+    })
+  })
 }
 
-// TODO make an api endpoint
-export const swapAllFields = () => {
-  return {
-    type: 'SWAP_ALL_FIELDS'
-  }
+export const getUser = () => (dispatch) => {
+  axios.get('api/auth/user').then((res) => {
+    dispatch({
+      type: 'GET_USER',
+      username: res.data ? res.data : null
+    })
+  })
+}
+
+export const logout = () => (dispatch) => {
+  axios.get('api/auth/logout').then((res) => {
+    dispatch({
+      type: 'LOGOUT_USER'
+    })
+  })
 }

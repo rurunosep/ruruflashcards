@@ -1,23 +1,8 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
-import {
-  addCard,
-  editCard,
-  deleteCard,
-  enableAllCards,
-  disableAllCards,
-  swapAllFields
-} from '../redux/actions'
+import { addCard, editCard, deleteCard } from '../redux/actions'
 
-function CardsList({
-  cards,
-  addCard,
-  editCard,
-  deleteCard,
-  enableAllCards,
-  disableAllCards,
-  swapAllFields
-}) {
+function CardsList({ cards, addCard, editCard, deleteCard }) {
   const [addingCard, setAddingCard] = useState(false)
   const [listVisible, setListVisible] = useState(true)
 
@@ -61,17 +46,6 @@ function CardsList({
               <button onClick={() => setAddingCard(true)}>New Card</button>
             </div>
           )}
-          <div className='list-controls'>
-            <button onClick={enableAllCards} disabled={true}>
-              Enable All
-            </button>
-            <button onClick={disableAllCards} disabled={true}>
-              Disable All
-            </button>
-            <button onClick={swapAllFields} disabled={true}>
-              Swap Fields
-            </button>
-          </div>
         </>
       )}
     </div>
@@ -185,11 +159,4 @@ const stateToProps = (state) => ({
   cards: state.cards
 })
 
-export default connect(stateToProps, {
-  addCard,
-  editCard,
-  deleteCard,
-  enableAllCards,
-  disableAllCards,
-  swapAllFields
-})(CardsList)
+export default connect(stateToProps, { addCard, editCard, deleteCard })(CardsList)
