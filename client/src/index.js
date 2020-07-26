@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import store from './redux/store'
 import App from './components/App'
+import 'papercss/dist/paper.min.css'
 import './style.css'
 
 ReactDOM.render(

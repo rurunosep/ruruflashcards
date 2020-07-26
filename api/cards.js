@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
   const { insertedId: newCardId } = await mongo
     .db('ruruflashcards')
     .collection('cards')
-    .insertOne({ front, back, enabled: true })
+    .insertOne({ front, back })
 
   await mongo
     .db('ruruflashcards')
@@ -50,10 +50,10 @@ router.post('/', async (req, res) => {
 
 // PUT api/cards/:id
 // Edit card in deck of current user
-// body: {front?, back?, enabled?}
+// body: {front?, back?}
 router.put('/:id', async (req, res) => {
   const { mongo } = req.locals
-  const { front, back, enabled } = req.body
+  const { front, back } = req.body
   const { id: cardId } = req.params
 
   if (!mongo.isConnected) return res.status(500).send('Mongo error')
@@ -71,7 +71,6 @@ router.put('/:id', async (req, res) => {
   let changes = {}
   if (typeof front === 'string') changes.front = front
   if (typeof back === 'string') changes.back = back
-  if (typeof enabled === 'boolean') changes.enabled = enabled
 
   await mongo
     .db('ruruflashcards')

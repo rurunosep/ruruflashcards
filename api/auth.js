@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
+const { ObjectId } = require('mongodb')
 
 // POST api/auth/login
 // Authenticate user of current session
@@ -34,12 +35,25 @@ router.post('/register', async (req, res) => {
   if (await mongo.db('ruruflashcards').collection('users').findOne({ username }))
     return res.status(400).send('User already exists')
 
+  const defaultCards = [
+    { front: 'chatte', back: 'cat' },
+    { front: 'chienne', back: 'dog' },
+    { front: 'poisson', back: 'fish' },
+    { front: 'oiseau', back: 'bird' },
+    { front: 'papillon', back: 'butterfly' }
+  ]
+
+  const { insertedIds: defaultCardIds } = await mongo
+    .db('ruruflashcards')
+    .collection('cards')
+    .insertMany(defaultCards)
+
   const { insertedId: defaultDeckId } = await mongo
     .db('ruruflashcards')
     .collection('decks')
     .insertOne({
       name: 'Default',
-      card_ids: []
+      card_ids: Object.values(defaultCardIds).map((val) => ObjectId(val))
     })
 
   const salt = await bcrypt.genSalt()

@@ -1,51 +1,47 @@
-body {
-  /* Nanum Gothic for Korean text */
-  font-family: 'Open Sans', 'Nanum Gothic', sans-serif;
+.card-no-hover:hover {
+  transform: none;
+  box-shadow: 15px 28px 25px -18px rgba(0, 0, 0, 0.2);
 }
 
-.app {
-  margin-top: 10px;
+i::before {
+  margin: 0 !important;
+}
+
+.flip-horizontal {
+  transform: scale(-1, 1);
+}
+
+a {
+  color: #41403e;
+  background: none;
+  text-decoration: underline dashed;
+}
+
+[popover-bottom]:hover::after,
+[popover-left]:hover::after,
+[popover-right]:hover::after,
+[popover-top]:hover::after {
+  opacity: 1;
+  transition: opacity 0.2s linear 0.3s;
+}
+
+nav {
+  z-index: initial;
+}
+
+/* Make the footer go to the bottom of the window */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+#root {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
 }
 
-.quiz {
-  width: 35%;
-  margin-right: 20px;
-}
-
-.card-display {
-  min-height: 200px;
-  background-color: #eeeeee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quiz-controls {
-  margin-top: 5px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.tts-options {
-  margin-top: 5px;
-}
-
-.tts-options select {
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
-.cards-list {
-  width: 35%;
-  background-color: #eeeeee;
-}
-
-.cards-list .show-hide-button {
-  margin: 5px;
-}
-
-.cards-list table {
-  width: 100%;
+footer {
+  margin-top: auto;
 }
