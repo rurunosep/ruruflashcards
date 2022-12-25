@@ -11,32 +11,38 @@ import RegisterModal from './RegisterModal'
 import AddCardModal from './AddCardModal'
 import EditCardModal from './EditCardModal'
 
-function App({ getUser, loadCards }) {
-  useEffect(() => {
-    getUser()
-    loadCards()
-    // eslint-disable-next-line
-  }, [])
+function App({ username, getUser, loadCards }) {
+	useEffect(() => {
+		getUser()
+		loadCards()
+		// eslint-disable-next-line
+	}, [])
 
-  return (
-    <>
-      <Navbar />
-      <ErrorAlert />
-      <div className='row flex-center margin-none'>
-        <div className='sm-col margin-small' style={{ width: '25rem' }}>
-          <Quiz />
-          <Options />
-        </div>
-        <div className='sm-col margin-small' style={{ width: '25rem' }}>
-          <CardsList />
-        </div>
-      </div>
-      <Footer />
-      <RegisterModal />
-      <AddCardModal />
-      <EditCardModal />
-    </>
-  )
+	return (
+		<>
+			<Navbar />
+			<ErrorAlert />
+			{username && (
+				<div className='row flex-center margin-none'>
+					<div className='sm-col margin-small' style={{ width: '25rem' }}>
+						<Quiz />
+						<Options />
+					</div>
+					<div className='sm-col margin-small' style={{ width: '25rem' }}>
+						<CardsList />
+					</div>
+				</div>
+			)}
+			<Footer />
+			<RegisterModal />
+			<AddCardModal />
+			<EditCardModal />
+		</>
+	)
 }
 
-export default connect(null, { getUser, loadCards })(App)
+const stateToProps = (state) => ({
+	username: state.username,
+})
+
+export default connect(stateToProps, { getUser, loadCards })(App)
