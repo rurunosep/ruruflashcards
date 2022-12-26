@@ -1,3 +1,5 @@
+if (process.env.NODE_ENV !== 'production') require('dotenv').config()
+
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
@@ -8,10 +10,6 @@ const { TextToSpeechClient } = require('@google-cloud/text-to-speech')
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcryptjs')
-
-if (process.env.NODE_ENV !== 'production') {
-	require('dotenv').config()
-}
 
 let mongo, ttsClient, voices, languageCodes
 

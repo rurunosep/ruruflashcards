@@ -1,12 +1,13 @@
 {
   "name": "ruruflashcards",
-  "author": "Kevin Hernandez-Rives",
+  "author": "Kevin Hernandez-Rives <rurunosep@gmail.com>",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rurunosep/ruruflashcards.git"
   },
   "engines": {
-    "node": "14.x"
+    "node": "18.x"
   },
   "scripts": {
     "start": "node server.js",
