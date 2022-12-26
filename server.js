@@ -9,11 +9,8 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcryptjs')
 
-// Load environment variables from config.js
 if (process.env.NODE_ENV !== 'production') {
-  Object.entries(require('./config')).map(([k, v]) => {
-    process.env[k] = v
-  })
+	require('dotenv').config()
 }
 
 let mongo, ttsClient, voices, languageCodes
@@ -24,18 +21,18 @@ app.use(express.static(path.join(__dirname, 'client', 'build')))
 initMongoDB()
 initTTS()
 app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    store: new MongoStore({ client: mongo }),
-    resave: false,
-    saveUninitialized: true
-  })
+	session({
+		secret: process.env.SESSION_SECRET,
+		store: new MongoStore({ client: mongo }),
+		resave: false,
+		saveUninitialized: true,
+	})
 )
 initPassport()
 
 app.use((req, res, next) => {
-  req.locals = { ...req.locals, ttsClient, voices, languageCodes, mongo, passport }
-  next()
+	req.locals = { ...req.locals, ttsClient, voices, languageCodes, mongo, passport }
+	next()
 })
 
 // Routes
@@ -49,78 +46,78 @@ app.listen(port, () => console.log(`Server started on port ${port}`))
 
 // --------------------
 function initMongoDB() {
-  const uri = process.env.MONGODB_URI
-  mongo = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  mongo
-    .connect()
-    .then(() => console.log('Connected to MongoDB'))
-    .catch((err) => console.err('Failed to connect to MongoDB'))
+	const uri = process.env.MONGODB_URI
+	mongo = new MongoClient(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+	mongo
+		.connect()
+		.then(() => console.log('Connected to MongoDB'))
+		.catch((err) => console.err('Failed to connect to MongoDB'))
 }
 
 function initTTS() {
-  try {
-    const credentials = JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS)
-    ttsClient = new TextToSpeechClient({
-      credentials: {
-        client_email: credentials.client_email,
-        private_key: credentials.private_key
-      },
-      projectId: credentials.project_id
-    })
+	try {
+		const credentials = JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS)
+		ttsClient = new TextToSpeechClient({
+			credentials: {
+				client_email: credentials.client_email,
+				private_key: credentials.private_key,
+			},
+			projectId: credentials.project_id,
+		})
 
-    ttsClient.listVoices().then(([response]) => {
-      voices = response.voices
-      languageCodes = [
-        ...new Set(voices.map((v) => v.languageCodes).reduce((flat, x) => [...flat, ...x]))
-      ].sort()
+		ttsClient.listVoices().then(([response]) => {
+			voices = response.voices
+			languageCodes = [
+				...new Set(voices.map((v) => v.languageCodes).reduce((flat, x) => [...flat, ...x])),
+			].sort()
 
-      if (!ttsClient || !voices || !languageCodes) throw Error()
-      console.log('Initialized TTS')
-    })
-  } catch (err) {
-    console.log('Failed to initalize TTS')
-  }
+			if (!ttsClient || !voices || !languageCodes) throw Error()
+			console.log('Initialized TTS')
+		})
+	} catch (err) {
+		console.log('Failed to initalize TTS')
+	}
 }
 
 function initPassport() {
-  passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        if (!mongo.isConnected) throw 'Mongo error'
+	passport.use(
+		new LocalStrategy(async (username, password, done) => {
+			try {
+				if (!mongo.isConnected) throw 'Mongo error'
 
-        const user = await mongo.db('ruruflashcards').collection('users').findOne({ username })
-        if (!user) return done(null, false)
+				const user = await mongo.db('ruruflashcards').collection('users').findOne({ username })
+				if (!user) return done(null, false)
 
-        const isMatch = await bcrypt.compare(password, user.password_hash)
-        if (!isMatch) return done(null, false)
+				const isMatch = await bcrypt.compare(password, user.password_hash)
+				if (!isMatch) return done(null, false)
 
-        return done(null, user)
-      } catch (err) {
-        done(err)
-      }
-    })
-  )
+				return done(null, user)
+			} catch (err) {
+				done(err)
+			}
+		})
+	)
 
-  passport.serializeUser((user, done) => {
-    done(null, user.username)
-  })
+	passport.serializeUser((user, done) => {
+		done(null, user.username)
+	})
 
-  passport.deserializeUser((username, done) => {
-    if (!mongo.isConnected) return done('Mongo error')
-    mongo
-      .db('ruruflashcards')
-      .collection('users')
-      .findOne({ username })
-      .then((user) => {
-        if (!user) return done(null, false)
-        return done(null, user)
-      })
-      .catch((err) => done(err))
-  })
+	passport.deserializeUser((username, done) => {
+		if (!mongo.isConnected) return done('Mongo error')
+		mongo
+			.db('ruruflashcards')
+			.collection('users')
+			.findOne({ username })
+			.then((user) => {
+				if (!user) return done(null, false)
+				return done(null, user)
+			})
+			.catch((err) => done(err))
+	})
 
-  app.use(passport.initialize())
-  app.use(passport.session())
+	app.use(passport.initialize())
+	app.use(passport.session())
 }

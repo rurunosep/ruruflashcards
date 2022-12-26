@@ -40,12 +40,10 @@ Run both automatically updating on any changes:
 npm run both
 ```
 
-Requires a `config.js` in the root directory with the following contents:
+Requires a `.env` in the root directory with the following contents:
 
-```js
-module.exports = {
-	GOOGLE_CLOUD_CREDENTIALS: '{Google Cloud Credentials JSON String}',
-	MONGODB_URI: '{MongoDB URI}',
-	SESSION_SECRET: '{Anything}',
-}
+```dosini
+GOOGLE_CLOUD_CREDENTIALS='{Google Cloud Credentials JSON String}',
+MONGODB_URI='{MongoDB URI}',
+SESSION_SECRET='{Anything}',
 ```
