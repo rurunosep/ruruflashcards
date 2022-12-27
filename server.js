@@ -3,9 +3,9 @@ if (process.env.NODE_ENV !== 'production') require('dotenv').config()
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
+const { MongoClient } = require('mongodb')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
-const { MongoClient } = require('mongodb')
 const { TextToSpeechClient } = require('@google-cloud/text-to-speech')
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
@@ -34,6 +34,7 @@ app.use((req, res, next) => {
 })
 
 // Routes
+app.use('/api/graphql', require('./api/graphql'))
 app.use('/api/tts', require('./api/tts'))
 app.use('/api/cards', require('./api/cards'))
 app.use('/api/auth', require('./api/auth'))
@@ -52,7 +53,7 @@ function initMongoDB() {
 	mongo
 		.connect()
 		.then(() => console.log('Connected to MongoDB'))
-		.catch((err) => console.err('Failed to connect to MongoDB'))
+		.catch((err) => console.err('Failed to connected to MongoDB'))
 }
 
 function initTTS() {
