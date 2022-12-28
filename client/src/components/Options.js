@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import { connect } from 'react-redux'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { setTtsLanguage, setTtsVoice, setAutoplayTts, setReverseQuiz } from '../redux/actions'
 
-function Options({
+export default function Options({
 	ttsLanguage,
 	ttsVoice,
 	autoplayTts,
@@ -17,7 +15,7 @@ function Options({
 	const [voices, setVoices] = useState([])
 	const [filteredVoices, setFilteredVoices] = useState([])
 
-	// TODO: something is real weird about the voices selection
+	// TODO: something is broken about the voices selection
 
 	// Get language codes
 	useEffect(() => {
@@ -105,17 +103,3 @@ function Options({
 		</div>
 	)
 }
-
-const stateToProps = (state) => ({
-	ttsLanguage: state.ttsLanguage,
-	ttsVoice: state.ttsVoice,
-	autoplayTts: state.autoplayTts,
-	reverseQuiz: state.reverseQuiz,
-})
-
-export default connect(stateToProps, {
-	setTtsLanguage,
-	setTtsVoice,
-	setAutoplayTts,
-	setReverseQuiz,
-})(Options)
