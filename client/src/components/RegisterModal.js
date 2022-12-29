@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { ModalContext } from '../contexts'
+import { ModalContext } from '../context'
 
 export default function RegisterModal({ register, setErrorMessage }) {
 	const { registerModalOpen: isOpen, setRegisterModalOpen: setOpen } = useContext(ModalContext)

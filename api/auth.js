@@ -75,4 +75,6 @@ router.get('/logout', (req, res) => {
 	res.send(`Successfully logged out ${username}`)
 })
 
+// TODO: endpoint to delete user and child decks and cards
+
 module.exports = router

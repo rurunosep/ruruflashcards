@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { ModalContext } from '../contexts'
+import { ModalContext } from '../context'
 
 export default function AddCardModal({ addCard }) {
 	const { addCardModalOpen: isOpen, setAddCardModalOpen: setOpen } = useContext(ModalContext)

@@ -5,20 +5,20 @@ const gql = String.raw
 
 const schema = buildSchema(gql`
 	type User {
-		id: ID!
+		_id: ID!
 		username: String!
 		password_hash: String!
 		decks: [Deck]
 	}
 
 	type Deck {
-		id: ID!
+		_id: ID!
 		name: String
 		cards: [Card]
 	}
 
 	type Card {
-		id: ID!
+		_id: ID!
 		front: String
 		back: String
 	}
@@ -39,12 +39,12 @@ const schema = buildSchema(gql`
 		"""
 		Edit a card in the first deck of the current user
 		"""
-		edit_card(id: ID!, front: String, back: String): Card
+		edit_card(_id: ID!, front: String, back: String): Card
 
 		"""
 		Delete a card in the first deck of the current user
 		"""
-		delete_card(id: ID!): Card
+		delete_card(_id: ID!): Card
 	}
 `)
 
@@ -55,9 +55,6 @@ const resolvers = {
 
 		if (!mongo.isConnected) throw new Error('Mongo error')
 		if (!req.user) throw new Error('No user logged in')
-
-		// TODO: do this in a single query
-		// cards are just going to go inside the deck object anyway
 
 		// Get deck
 		const deck = await mongo
@@ -70,7 +67,6 @@ const resolvers = {
 			.db('ruruflashcards')
 			.collection('cards')
 			.find({ _id: { $in: deck.card_ids } })
-			.map((card) => ({ id: card._id, ...card }))
 			.toArray()
 
 		return cards
@@ -98,13 +94,13 @@ const resolvers = {
 			.collection('decks')
 			.updateOne({ _id: req.user.deck_ids[0] }, { $push: { card_ids: ObjectId(cardId) } })
 
-		return { id: cardId, ...card }
+		return { _id: cardId, ...card }
 	},
 
 	// Edit a card in the first deck of the current user
 	edit_card: async (args, req) => {
 		const { mongo } = req.locals
-		const { id: cardId, front, back } = args
+		const { _id: cardId, front, back } = args
 
 		if (!mongo.isConnected) throw new Error('Mongo error')
 		if (!req.user) throw new Error('No user logged in')
@@ -129,13 +125,13 @@ const resolvers = {
 			.collection('cards')
 			.findOneAndUpdate({ _id: ObjectId(cardId) }, { $set: changes }, { returnOriginal: false })
 
-		return { id: card._id, ...card }
+		return card
 	},
 
 	// Delete a card in the first deck of the current user
 	delete_card: async (args, req) => {
 		const { mongo } = req.locals
-		const { id: cardId } = args
+		const { _id: cardId } = args
 
 		if (!mongo.isConnected) throw new Error('Mongo error')
 		if (!req.user) throw new Error('No user logged in')
@@ -162,7 +158,7 @@ const resolvers = {
 			.collection('cards')
 			.findOneAndDelete({ _id: ObjectId(cardId) })
 
-		return { id: card._id, ...card }
+		return card
 	},
 }
 

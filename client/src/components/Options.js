@@ -3,19 +3,17 @@ import axios from 'axios'
 
 export default function Options({
 	ttsLanguage,
-	ttsVoice,
+	ttsVoiceName,
 	autoplayTts,
 	reverseQuiz,
 	setTtsLanguage,
-	setTtsVoice,
+	setTtsVoiceName,
 	setAutoplayTts,
 	setReverseQuiz,
 }) {
 	const [languages, setLanguages] = useState([])
 	const [voices, setVoices] = useState([])
-	const [filteredVoices, setFilteredVoices] = useState([])
-
-	// TODO: something is broken about the voices selection
+	const [filteredVoiceNames, setFilteredVoiceNames] = useState([])
 
 	// Get language codes
 	useEffect(() => {
@@ -29,7 +27,7 @@ export default function Options({
 
 	// Filter voices
 	useEffect(() => {
-		const filteredVoices = voices
+		const filteredVoiceNames = voices
 			.filter((voice) => voice.languageCodes.includes(ttsLanguage))
 			.sort((a, b) => {
 				if (a.name < b.name) return -1
@@ -37,9 +35,17 @@ export default function Options({
 				return 0
 			})
 			.map((voice) => voice.name)
-		setFilteredVoices(filteredVoices)
-		setTtsVoice(filteredVoices[0])
-		// eslint-disable-next-line
+		setFilteredVoiceNames(filteredVoiceNames)
+		// This condition is so that the voice name read from local storage is not
+		// unset when voices are first loaded
+		if (
+			filteredVoiceNames &&
+			filteredVoiceNames.length > 0 &&
+			!filteredVoiceNames.includes(ttsVoiceName)
+		) {
+			setTtsVoiceName(filteredVoiceNames[0])
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ttsLanguage, voices])
 
 	return (
@@ -61,8 +67,8 @@ export default function Options({
 				</div>
 				<div className='col'>
 					<label htmlFor='voice'>TTS Voice:</label>
-					<select id='voice' value={ttsVoice} onChange={(e) => setTtsVoice(e.target.value)}>
-						{filteredVoices.map((voice) => (
+					<select id='voice' value={ttsVoiceName} onChange={(e) => setTtsVoiceName(e.target.value)}>
+						{filteredVoiceNames.map((voice) => (
 							<option key={voice} value={voice}>
 								{voice}
 							</option>

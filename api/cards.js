@@ -64,7 +64,7 @@ router.put('/:id', async (req, res) => {
 		.collection('decks')
 		.findOne({
 			_id: req.user.deck_ids[0],
-			card_ids: ObjectId(cardId), // TODO this explodes if cardId is wrong format
+			card_ids: ObjectId(cardId),
 		})
 	if (!deck) return res.status(400).send(`User does not own card of id: ${cardId}`)
 
@@ -75,7 +75,7 @@ router.put('/:id', async (req, res) => {
 	await mongo
 		.db('ruruflashcards')
 		.collection('cards')
-		.updateOne({ _id: ObjectId(cardId) }, { $set: changes }) // TODO above
+		.updateOne({ _id: ObjectId(cardId) }, { $set: changes })
 
 	res.status(204).send()
 })
@@ -94,14 +94,14 @@ router.delete('/:id', async (req, res) => {
 		.collection('decks')
 		.findOne({
 			_id: req.user.deck_ids[0],
-			card_ids: ObjectId(cardId), // TODO above
+			card_ids: ObjectId(cardId),
 		})
 	if (!deck) return res.status(400).send(`User does not own card of id: ${cardId}`)
 
 	await mongo
 		.db('ruruflashcards')
 		.collection('cards')
-		.deleteOne({ _id: ObjectId(req.params.id) }) // TODO above
+		.deleteOne({ _id: ObjectId(req.params.id) })
 
 	res.status(204).send()
 })

@@ -68,16 +68,16 @@ function initTTS() {
 		})
 
 		ttsClient.listVoices().then(([response]) => {
-			voices = response.voices
-			languageCodes = [
-				...new Set(voices.map((v) => v.languageCodes).reduce((flat, x) => [...flat, ...x])),
-			].sort()
+			// For some reason, the response contains duplicate voices
+			// Remove duplicates by putting them in a Map keyed by the "unique" voice name
+			voices = [...new Map(response.voices.map((v) => [v.name, v])).values()]
+			languageCodes = [...new Set(voices.map((v) => v.languageCodes[0]))].sort()
 
 			if (!ttsClient || !voices || !languageCodes) throw Error()
 			console.log('Initialized TTS')
 		})
 	} catch (err) {
-		console.log('Failed to initalize TTS')
+		console.err('Failed to initalize TTS')
 	}
 }
 

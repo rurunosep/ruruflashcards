@@ -1,22 +1,21 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
+import axios from 'axios'
 import Navbar from './Navbar'
 import ErrorAlert from './ErrorAlert'
 import Quiz from './Quiz'
 import Options from './Options'
 import CardsList from './CardsList'
-import Footer from './Footer'
 import RegisterModal from './RegisterModal'
 import AddCardModal from './AddCardModal'
 import EditCardModal from './EditCardModal'
-import { ModalContext } from '../contexts'
-
-import axios from 'axios'
+import Footer from './Footer'
+import { ModalContext } from '../context'
 
 export default function App() {
 	const [username, setUsername] = useState(null)
 	const [cards, setCards] = useState([])
 	const [ttsLanguage, setTtsLanguage] = useState('fr-FR')
-	const [ttsVoice, setTtsVoice] = useState(null)
+	const [ttsVoiceName, setTtsVoiceName] = useState(null)
 	const [autoplayTts, setAutoplayTts] = useState(false)
 	const [reverseQuiz, setReverseQuiz] = useState(false)
 	const [addCardModalOpen, setAddCardModalOpen] = useState(false)
@@ -30,7 +29,7 @@ export default function App() {
 		const options = JSON.parse(localStorage.getItem('options'))
 		if (options) {
 			setTtsLanguage(options.ttsLanguage)
-			setTtsVoice(options.ttsVoice)
+			setTtsVoiceName(options.ttsVoiceName)
 			setAutoplayTts(options.autoplayTts)
 			setReverseQuiz(options.reverseQuiz)
 		}
@@ -40,9 +39,9 @@ export default function App() {
 	useEffect(() => {
 		localStorage.setItem(
 			'options',
-			JSON.stringify({ ttsLanguage, ttsVoice, autoplayTts, reverseQuiz })
+			JSON.stringify({ ttsLanguage, ttsVoiceName, autoplayTts, reverseQuiz })
 		)
-	}, [ttsLanguage, ttsVoice, autoplayTts, reverseQuiz])
+	}, [ttsLanguage, ttsVoiceName, autoplayTts, reverseQuiz])
 
 	// Get username of the authenticated user of the current session
 	useEffect(() => {
@@ -53,30 +52,72 @@ export default function App() {
 
 	// Load cards from api
 	useEffect(() => {
-		axios.get('/api/cards').then((res) => {
-			setCards(res.data)
-		})
+		axios
+			.post('/api/graphql', {
+				query: `
+					{
+						cards {
+							_id
+							front
+							back
+						}
+					}
+				`,
+			})
+			.then((res) => {
+				setCards(res.data.data.cards || [])
+			})
 	}, [username])
 
-	const addCard = (front, back) => {
-		axios.post('/api/cards', { front, back }).then((res) => {
-			setCards([...cards, { _id: res.data, front, back }])
-		})
-	}
-
-	const editCard = (_id, changes) => {
+	const addCard = useCallback((front, back) => {
 		axios
-			.put(`/api/cards/${_id}`, changes)
-			.then((res) => setCards(cards.map((c) => (c._id === _id ? { ...c, ...changes } : c))))
-	}
+			.post('/api/graphql', {
+				query: `
+					mutation {
+						add_card(front: "${front}", back: "${back}") {
+							_id
+						}
+					}
+				`,
+			})
+			.then((res) => {
+				setCards((cards) => [...cards, { _id: res.data.data.add_card._id, front, back }])
+			})
+	}, [])
 
-	const deleteCard = (_id) => {
+	const editCard = useCallback((_id, changes) => {
+		const front = changes.front || 'null'
+		const back = changes.back || 'null'
 		axios
-			.delete(`/api/cards/${_id}`)
-			.then((res) => setCards([...cards.filter((c) => c._id !== _id)]))
-	}
+			.post('/api/graphql', {
+				query: `
+					mutation {
+						edit_card(_id: "${_id}", front: "${front}", back: "${back}") {
+							_id
+						}
+					}
+			`,
+			})
+			.then((res) =>
+				setCards((cards) => cards.map((c) => (c._id === _id ? { ...c, ...changes } : c)))
+			)
+	}, [])
 
-	const login = (username, password) => {
+	const deleteCard = useCallback((_id) => {
+		axios
+			.post(`/api/graphql`, {
+				query: `
+					mutation {
+						delete_card(_id: "${_id}") {
+							_id
+						}
+					}
+				`,
+			})
+			.then((res) => setCards((cards) => [...cards.filter((c) => c._id !== _id)]))
+	}, [])
+
+	const login = useCallback((username, password) => {
 		axios
 			.post('api/auth/login', { username, password })
 			.then((res) => {
@@ -85,16 +126,16 @@ export default function App() {
 			.catch((err) => {
 				setErrorMessage(err.response.data)
 			})
-	}
+	}, [])
 
-	const logout = () => {
+	const logout = useCallback(() => {
 		axios.get('api/auth/logout').then((res) => {
 			setUsername(null)
 			setCards([])
 		})
-	}
+	}, [])
 
-	const register = (username, password) => {
+	const register = useCallback((username, password) => {
 		axios
 			.post('api/auth/register', { username, password })
 			.then((res) => {
@@ -103,10 +144,10 @@ export default function App() {
 			.catch((err) => {
 				setErrorMessage(err.response.data)
 			})
-	}
+	}, [])
 
 	return (
-		<>
+		<React.StrictMode>
 			<ModalContext.Provider
 				value={{
 					addCardModalOpen,
@@ -127,17 +168,17 @@ export default function App() {
 							<Quiz
 								cards={cards}
 								ttsLanguage={ttsLanguage}
-								ttsVoice={ttsVoice}
+								ttsVoiceName={ttsVoiceName}
 								autoplayTts={autoplayTts}
 								reverseQuiz={reverseQuiz}
 							/>
 							<Options
 								ttsLanguage={ttsLanguage}
-								ttsVoice={ttsVoice}
+								ttsVoiceName={ttsVoiceName}
 								autoplayTts={autoplayTts}
 								reverseQuiz={reverseQuiz}
 								setTtsLanguage={setTtsLanguage}
-								setTtsVoice={setTtsVoice}
+								setTtsVoiceName={setTtsVoiceName}
 								setAutoplayTts={setAutoplayTts}
 								setReverseQuiz={setReverseQuiz}
 							/>
@@ -152,6 +193,6 @@ export default function App() {
 				<AddCardModal addCard={addCard} />
 				<EditCardModal editCard={editCard} deleteCard={deleteCard} />
 			</ModalContext.Provider>
-		</>
+		</React.StrictMode>
 	)
 }

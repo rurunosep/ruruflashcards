@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react'
-import { ModalContext } from '../contexts'
+import { ModalContext } from '../context'
 
 export default function EditCardModal({ editCard, deleteCard }) {
 	const {

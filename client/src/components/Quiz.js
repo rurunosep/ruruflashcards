@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-export default function Quiz({ cards, ttsLanguage, ttsVoice, autoplayTts, reverseQuiz }) {
+export default function Quiz({ cards, ttsLanguage, ttsVoiceName, autoplayTts, reverseQuiz }) {
 	const [card, setCard] = useState(null)
 	const [showNewCard, setShowNewCard] = useState(true)
 	const [flipped, setFlipped] = useState(false)
 
 	useEffect(() => {
-		if (!card || !cards.some((c) => c._id == card._id)) setCard(null)
+		if (!card || !cards.some((c) => c._id === card._id)) setCard(null)
 		if (!card) setShowNewCard(true)
 		// eslint-disable-next-line
 	}, [cards])
@@ -27,17 +27,18 @@ export default function Quiz({ cards, ttsLanguage, ttsVoice, autoplayTts, revers
 		if (card && autoplayTts) {
 			playTTS()
 		}
+		// eslint-disable-next-line
 	}, [card])
 
 	const playTTS = () => {
-		if (!ttsLanguage || !ttsVoice || !card) return
+		if (!ttsLanguage || !ttsVoiceName || !card) return
 		axios
 			.post(
 				'/api/tts/synth',
 				{
 					text: (reverseQuiz ? !flipped : flipped) ? card.back : card.front,
 					languageCode: ttsLanguage,
-					voice: ttsVoice,
+					voice: ttsVoiceName,
 				},
 				{ responseType: 'blob' }
 			)
