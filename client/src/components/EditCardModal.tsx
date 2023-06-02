@@ -1,7 +1,18 @@
 import { useState, useEffect, useContext } from 'react'
 import { ModalContext } from '../context'
 
-export default function EditCardModal({ editCard, deleteCard }) {
+interface EditCardModalProps {
+	editCard: (
+		_id: string,
+		changes: {
+			front?: string | undefined
+			back?: string | undefined
+		}
+	) => void
+	deleteCard: (_id: string) => void
+}
+
+export default function EditCardModal({ editCard, deleteCard }: EditCardModalProps) {
 	const {
 		editCardModalOpen: isOpen,
 		setEditCardModalOpen: setOpen,
@@ -15,13 +26,15 @@ export default function EditCardModal({ editCard, deleteCard }) {
 		}
 	}, [card])
 
-	const onChange = (e) => {
+	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFields({ ...fields, [e.target.name]: e.target.value })
 	}
 
-	const onSubmit = (e) => {
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		editCard(card._id, fields)
+		if (card) {
+			editCard(card._id, fields)
+		}
 		setFields({ front: '', back: '' })
 		setOpen(false)
 	}
@@ -66,7 +79,9 @@ export default function EditCardModal({ editCard, deleteCard }) {
 								className='btn-small border-danger'
 								type='button'
 								onClick={() => {
-									deleteCard(card._id)
+									if (card) {
+										deleteCard(card._id)
+									}
 									setOpen(false)
 								}}
 							>

@@ -1,7 +1,12 @@
 import { useState, useContext } from 'react'
 import { ModalContext } from '../context'
+import { Card } from './App'
 
-export default function CardsList({ cards }) {
+interface CardsListProps {
+	cards: Card[]
+}
+
+export default function CardsList({ cards }: CardsListProps) {
 	const { setAddCardModalOpen, setEditCardModalOpen, setCardToEdit } = useContext(ModalContext)
 	const [listVisible, setListVisible] = useState(true)
 

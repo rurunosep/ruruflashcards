@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+interface OptionsProps {
+	ttsLanguage: string
+	ttsVoiceName: string | null
+	autoplayTts: boolean
+	reverseQuiz: boolean
+	setTtsLanguage: (_: string) => void
+	setTtsVoiceName: (_: string | null) => void
+	setAutoplayTts: (_: boolean) => void
+	setReverseQuiz: (_: boolean) => void
+}
+
+interface TtsVoice {
+	languageCodes: string[]
+	name: string
+}
+
 export default function Options({
 	ttsLanguage,
 	ttsVoiceName,
@@ -10,10 +26,10 @@ export default function Options({
 	setTtsVoiceName,
 	setAutoplayTts,
 	setReverseQuiz,
-}) {
-	const [languages, setLanguages] = useState([])
-	const [voices, setVoices] = useState([])
-	const [filteredVoiceNames, setFilteredVoiceNames] = useState([])
+}: OptionsProps) {
+	const [languages, setLanguages] = useState([] as string[])
+	const [voices, setVoices] = useState([] as TtsVoice[])
+	const [filteredVoiceNames, setFilteredVoiceNames] = useState([] as string[])
 
 	// Get language codes
 	useEffect(() => {
@@ -41,7 +57,7 @@ export default function Options({
 		if (
 			filteredVoiceNames &&
 			filteredVoiceNames.length > 0 &&
-			!filteredVoiceNames.includes(ttsVoiceName)
+			!(ttsVoiceName && filteredVoiceNames.includes(ttsVoiceName))
 		) {
 			setTtsVoiceName(filteredVoiceNames[0])
 		}
@@ -67,7 +83,11 @@ export default function Options({
 				</div>
 				<div className='col'>
 					<label htmlFor='voice'>TTS Voice:</label>
-					<select id='voice' value={ttsVoiceName} onChange={(e) => setTtsVoiceName(e.target.value)}>
+					<select
+						id='voice'
+						value={ttsVoiceName || ''}
+						onChange={(e) => setTtsVoiceName(e.target.value)}
+					>
 						{filteredVoiceNames.map((voice) => (
 							<option key={voice} value={voice}>
 								{voice}

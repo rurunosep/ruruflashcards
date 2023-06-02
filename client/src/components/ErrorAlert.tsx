@@ -1,4 +1,9 @@
-export default function ErrorAlert({ errorMessage, setErrorMessage }) {
+interface ErrorAlertProps {
+	errorMessage: string | null
+	setErrorMessage: (message: string | null) => void
+}
+
+export default function ErrorAlert({ errorMessage, setErrorMessage }: ErrorAlertProps) {
 	if (!errorMessage) return null
 
 	return (

@@ -1,8 +1,23 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { Card } from './App'
 
-export default function Quiz({ cards, ttsLanguage, ttsVoiceName, autoplayTts, reverseQuiz }) {
-	const [card, setCard] = useState(null)
+interface QuizProps {
+	cards: Card[]
+	ttsLanguage: string
+	ttsVoiceName: string | null
+	autoplayTts: boolean
+	reverseQuiz: boolean
+}
+
+export default function Quiz({
+	cards,
+	ttsLanguage,
+	ttsVoiceName,
+	autoplayTts,
+	reverseQuiz,
+}: QuizProps) {
+	const [card, setCard] = useState<Card | null>(null)
 	const [showNewCard, setShowNewCard] = useState(true)
 	const [flipped, setFlipped] = useState(false)
 

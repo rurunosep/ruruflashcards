@@ -11,22 +11,28 @@ import EditCardModal from './EditCardModal'
 import Footer from './Footer'
 import { ModalContext } from '../context'
 
+export interface Card {
+	_id: string
+	front: string
+	back: string
+}
+
 export default function App() {
-	const [username, setUsername] = useState(null)
-	const [cards, setCards] = useState([])
+	const [username, setUsername] = useState<string | null>(null)
+	const [cards, setCards] = useState([] as Card[])
 	const [ttsLanguage, setTtsLanguage] = useState('fr-FR')
-	const [ttsVoiceName, setTtsVoiceName] = useState(null)
+	const [ttsVoiceName, setTtsVoiceName] = useState<string | null>(null)
 	const [autoplayTts, setAutoplayTts] = useState(false)
 	const [reverseQuiz, setReverseQuiz] = useState(false)
 	const [addCardModalOpen, setAddCardModalOpen] = useState(false)
 	const [editCardModalOpen, setEditCardModalOpen] = useState(false)
-	const [cardToEdit, setCardToEdit] = useState(null)
+	const [cardToEdit, setCardToEdit] = useState<Card | null>(null)
 	const [registerModalOpen, setRegisterModalOpen] = useState(false)
-	const [errorMessage, setErrorMessage] = useState(null)
+	const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
 	// Load options from local storage
 	useEffect(() => {
-		const options = JSON.parse(localStorage.getItem('options'))
+		const options = JSON.parse(localStorage.getItem('options') || '')
 		if (options) {
 			setTtsLanguage(options.ttsLanguage)
 			setTtsVoiceName(options.ttsVoiceName)
@@ -69,7 +75,7 @@ export default function App() {
 			})
 	}, [username])
 
-	const addCard = useCallback((front, back) => {
+	const addCard = useCallback((front: string, back: string) => {
 		axios
 			.post('/api/graphql', {
 				query: `
@@ -85,7 +91,7 @@ export default function App() {
 			})
 	}, [])
 
-	const editCard = useCallback((_id, changes) => {
+	const editCard = useCallback((_id: string, changes: { front?: string; back?: string }) => {
 		const front = changes.front || 'null'
 		const back = changes.back || 'null'
 		axios
@@ -103,7 +109,7 @@ export default function App() {
 			)
 	}, [])
 
-	const deleteCard = useCallback((_id) => {
+	const deleteCard = useCallback((_id: string) => {
 		axios
 			.post(`/api/graphql`, {
 				query: `
@@ -117,7 +123,7 @@ export default function App() {
 			.then((res) => setCards((cards) => [...cards.filter((c) => c._id !== _id)]))
 	}, [])
 
-	const login = useCallback((username, password) => {
+	const login = useCallback((username: string, password: string) => {
 		axios
 			.post('api/auth/login', { username, password })
 			.then((res) => {
@@ -135,7 +141,7 @@ export default function App() {
 		})
 	}, [])
 
-	const register = useCallback((username, password) => {
+	const register = useCallback((username: string, password: string) => {
 		axios
 			.post('api/auth/register', { username, password })
 			.then((res) => {

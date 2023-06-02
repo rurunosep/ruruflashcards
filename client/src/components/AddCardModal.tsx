@@ -1,15 +1,19 @@
 import { useState, useContext } from 'react'
 import { ModalContext } from '../context'
 
-export default function AddCardModal({ addCard }) {
+interface AddCardModalProps {
+	addCard: (front: string, back: string) => void
+}
+
+export default function AddCardModal({ addCard }: AddCardModalProps) {
 	const { addCardModalOpen: isOpen, setAddCardModalOpen: setOpen } = useContext(ModalContext)
 	const [fields, setFields] = useState({ front: '', back: '' })
 
-	const onChange = (e) => {
+	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFields({ ...fields, [e.target.name]: e.target.value })
 	}
 
-	const onSubmit = (e) => {
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		addCard(fields.front, fields.back)
 		setFields({ front: '', back: '' })

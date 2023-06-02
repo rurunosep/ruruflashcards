@@ -6,7 +6,7 @@ Live at [ruruflashcards.herokuapp.com](https://ruruflashcards.herokuapp.com/)
 
 ## Techs and Libraries Used
 
-The client is made with React, built with Create React App, and styled with [PaperCSS](https://www.getpapercss.com/) for a pleasant, hand-drawn look.
+The client is made with React and TypeScript, built with Create React App, and styled with [PaperCSS](https://www.getpapercss.com/) for a pleasant, hand-drawn look.
 
 State is managed with the React Context API and basic prop passing. (Previously, Redux was used, but it was too heavy-weight for such a simple app.) Client settings are stored in local storage.
 
@@ -20,7 +20,7 @@ Google Cloud Text-to-Speech is used to read out card contents.
 
 Install server and client dependencies and build client:
 
-```
+```shell
 npm install
 cd client
 npm install

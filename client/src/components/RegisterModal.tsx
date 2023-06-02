@@ -1,15 +1,20 @@
 import { useState, useContext } from 'react'
 import { ModalContext } from '../context'
 
-export default function RegisterModal({ register, setErrorMessage }) {
+interface RegisterModalProps {
+	register: (username: string, password: string) => void
+	setErrorMessage: (message: string | null) => void
+}
+
+export default function RegisterModal({ register, setErrorMessage }: RegisterModalProps) {
 	const { registerModalOpen: isOpen, setRegisterModalOpen: setOpen } = useContext(ModalContext)
 	const [fields, setFields] = useState({ username: '', password1: '', password2: '' })
 
-	const onChange = (e) => {
+	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFields({ ...fields, [e.target.name]: e.target.value })
 	}
 
-	const onSubmit = (e) => {
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		if (fields.password1 === fields.password2) {
 			register(fields.username, fields.password1)

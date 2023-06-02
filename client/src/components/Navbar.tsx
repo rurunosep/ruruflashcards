@@ -1,15 +1,21 @@
 import { useState, useContext } from 'react'
 import { ModalContext } from '../context'
 
-export default function Navbar({ username, login, logout }) {
+interface NavbarProps {
+	username: string | null
+	login: (username: string, password: string) => void
+	logout: () => void
+}
+
+export default function Navbar({ username, login, logout }: NavbarProps) {
 	const { setRegisterModalOpen } = useContext(ModalContext)
 	const [fields, setFields] = useState({ username: '', password: '' })
 
-	const onChange = (e) => {
+	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFields({ ...fields, [e.target.name]: e.target.value })
 	}
 
-	const onSubmit = (e) => {
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		login(fields.username, fields.password)
 		setFields({ username: '', password: '' })
