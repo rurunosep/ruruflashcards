@@ -9,7 +9,7 @@ import RegisterModal from './RegisterModal'
 import AddCardModal from './AddCardModal'
 import EditCardModal from './EditCardModal'
 import Footer from './Footer'
-import { ModalContext } from '../context'
+import { ModalContextProvider } from '../context'
 
 export interface Card {
 	_id: string
@@ -24,15 +24,11 @@ export default function App() {
 	const [ttsVoiceName, setTtsVoiceName] = useState<string | null>(null)
 	const [autoplayTts, setAutoplayTts] = useState(false)
 	const [reverseQuiz, setReverseQuiz] = useState(false)
-	const [addCardModalOpen, setAddCardModalOpen] = useState(false)
-	const [editCardModalOpen, setEditCardModalOpen] = useState(false)
-	const [cardToEdit, setCardToEdit] = useState<Card | null>(null)
-	const [registerModalOpen, setRegisterModalOpen] = useState(false)
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
 	// Load options from local storage
 	useEffect(() => {
-		const options = JSON.parse(localStorage.getItem('options') || '')
+		const options = JSON.parse(localStorage.getItem('options') || '{}')
 		if (options) {
 			setTtsLanguage(options.ttsLanguage)
 			setTtsVoiceName(options.ttsVoiceName)
@@ -82,7 +78,7 @@ export default function App() {
 					mutation {
 						add_card(front: "${front}", back: "${back}") {
 							_id
-						}
+						}	
 					}
 				`,
 			})
@@ -154,18 +150,7 @@ export default function App() {
 
 	return (
 		<React.StrictMode>
-			<ModalContext.Provider
-				value={{
-					addCardModalOpen,
-					setAddCardModalOpen,
-					editCardModalOpen,
-					setEditCardModalOpen,
-					cardToEdit,
-					setCardToEdit,
-					registerModalOpen,
-					setRegisterModalOpen,
-				}}
-			>
+			<ModalContextProvider>
 				<Navbar username={username} login={login} logout={logout} />
 				<ErrorAlert errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
 				{username && (
@@ -198,7 +183,7 @@ export default function App() {
 				<RegisterModal register={register} setErrorMessage={setErrorMessage} />
 				<AddCardModal addCard={addCard} />
 				<EditCardModal editCard={editCard} deleteCard={deleteCard} />
-			</ModalContext.Provider>
+			</ModalContextProvider>
 		</React.StrictMode>
 	)
 }

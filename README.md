@@ -18,25 +18,10 @@ Google Cloud Text-to-Speech is used to read out card contents.
 
 ## Building and Running
 
-Install server and client dependencies and build client:
-
-```shell
-npm install
-cd client
-npm install
-npm run build
-cd ..
-```
-
+Build client: `npm run build`
 Run server normally: `npm run start`  
-Run server automatically updating on any changes: `npm run server`  
-Run client automatically updating on any changes: `npm run client`  
-Run both automatically updating on any changes: `npm run both`
+Run server automatically updating on any changes: `npm run dev-server`  
+Run client automatically updating on any changes: `npm run dev-client`  
+Run both automatically updating on any changes: `npm run dev-both`
 
-Requires a `.env` in the root directory with the following contents:
-
-```dosini
-GOOGLE_CLOUD_CREDENTIALS='{Google Cloud Credentials JSON String}',
-MONGODB_URI='{MongoDB URI}',
-SESSION_SECRET='{Anything}',
-```
+Requires a `.env` in the server directory based on `.env.example`

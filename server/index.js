@@ -15,7 +15,7 @@ let mongo, ttsClient, voices, languageCodes
 
 const app = express()
 app.use(express.json())
-app.use(express.static(path.join(__dirname, 'client', 'build')))
+app.use(express.static(path.join(__dirname, '..', 'client', 'build')))
 initMongoDB()
 initTTS()
 app.use(
@@ -53,7 +53,7 @@ function initMongoDB() {
 	mongo
 		.connect()
 		.then(() => console.log('Connected to MongoDB'))
-		.catch((err) => console.err('Failed to connected to MongoDB'))
+		.catch((err) => console.error('Failed to connected to MongoDB'))
 }
 
 function initTTS() {
@@ -77,7 +77,7 @@ function initTTS() {
 			console.log('Initialized TTS')
 		})
 	} catch (err) {
-		console.err('Failed to initalize TTS')
+		console.error('Failed to initalize TTS')
 	}
 }
 

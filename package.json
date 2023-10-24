@@ -1,39 +1,24 @@
 {
-  "name": "ruruflashcards",
-  "author": "Kevin Hernandez-Rives <rurunosep@gmail.com>",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rurunosep/ruruflashcards.git"
-  },
-  "engines": {
-    "node": "18.x"
-  },
-  "scripts": {
-    "start": "node server.js",
-    "server": "nodemon server.js",
-    "client": "npm run start --prefix client",
-    "both": "concurrently \"npm run server\" \"npm run client\"",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
-  },
-  "nodemonConfig": {
-    "ignore": "client"
-  },
-  "dependencies": {
-    "@google-cloud/text-to-speech": "^3.0.1",
-    "bcryptjs": "^2.4.3",
-    "connect-mongo": "^3.2.0",
-    "dotenv": "^16.0.3",
-    "express": "^4.17.1",
-    "express-graphql": "^0.12.0",
-    "express-session": "^1.17.1",
-    "graphql": "^15.8.0",
-    "mongodb": "^3.7.3",
-    "passport": "^0.4.1",
-    "passport-local": "^1.0.0"
-  },
-  "devDependencies": {
-    "concurrently": "^5.2.0",
-    "nodemon": "^2.0.4"
-  }
+	"name": "ruruflashcards",
+	"author": "Kevin Hernandez-Rives <rurunosep@gmail.com>",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rurunosep/ruruflashcards.git"
+	},
+	"workspaces": [
+		"./server",
+		"./client"
+	],
+	"scripts": {
+		"build": "npm run build --prefix client",
+		"start": "npm run start --prefix server",
+		"dev-server": "npm run dev --prefix server",
+		"dev-client": "npm run start --prefix client",
+		"dev-both": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
+		"heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+	},
+	"devDependencies": {
+		"concurrently": "^5.2.0"
+	}
 }
