@@ -100,9 +100,7 @@ export default function App() {
 					}
 			`,
 			})
-			.then((res) =>
-				setCards((cards) => cards.map((c) => (c._id === _id ? { ...c, ...changes } : c)))
-			)
+			.then(() => setCards((cards) => cards.map((c) => (c._id === _id ? { ...c, ...changes } : c))))
 	}, [])
 
 	const deleteCard = useCallback((_id: string) => {
@@ -116,13 +114,13 @@ export default function App() {
 					}
 				`,
 			})
-			.then((res) => setCards((cards) => [...cards.filter((c) => c._id !== _id)]))
+			.then(() => setCards((cards) => [...cards.filter((c) => c._id !== _id)]))
 	}, [])
 
 	const login = useCallback((username: string, password: string) => {
 		axios
 			.post('api/auth/login', { username, password })
-			.then((res) => {
+			.then(() => {
 				setUsername(username)
 			})
 			.catch((err) => {
@@ -131,7 +129,7 @@ export default function App() {
 	}, [])
 
 	const logout = useCallback(() => {
-		axios.get('api/auth/logout').then((res) => {
+		axios.get('api/auth/logout').then(() => {
 			setUsername(null)
 			setCards([])
 		})
@@ -140,7 +138,7 @@ export default function App() {
 	const register = useCallback((username: string, password: string) => {
 		axios
 			.post('api/auth/register', { username, password })
-			.then((res) => {
+			.then(() => {
 				setUsername(username)
 			})
 			.catch((err) => {

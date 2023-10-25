@@ -42,6 +42,7 @@ export default function Options({
 	}, [])
 
 	// Filter voices
+	// TODO: useMemo instead?
 	useEffect(() => {
 		const filteredVoiceNames = voices
 			.filter((voice) => voice.languageCodes.includes(ttsLanguage))

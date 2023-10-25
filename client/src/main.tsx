@@ -4,4 +4,9 @@ import App from './components/App'
 import 'papercss/dist/paper.min.css'
 import './style.css'
 
-ReactDOM.render(<App />, document.getElementById('root'))
+ReactDOM.render(
+	<React.StrictMode>
+		<App />
+	</React.StrictMode>,
+	document.getElementById('root')
+)
