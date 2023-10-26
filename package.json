@@ -11,12 +11,11 @@
 		"./client"
 	],
 	"scripts": {
-		"build": "npm run build --prefix client",
 		"start": "npm run start --prefix server",
+		"build": "npm run build --prefix server && npm run build --prefix client",
 		"dev-server": "npm run dev --prefix server",
 		"dev-client": "npm run start --prefix client",
-		"dev-both": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
-		"heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+		"dev-both": "concurrently \"npm run dev-server\" \"npm run dev-client\""
 	},
 	"devDependencies": {
 		"concurrently": "^5.2.0"

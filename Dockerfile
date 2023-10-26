@@ -8,8 +8,7 @@ COPY server/package*.json server/
 RUN npm install
 
 COPY client client
-RUN npm run build
-
 COPY server server
+RUN npm run build
 
 CMD ["npm", "start"]

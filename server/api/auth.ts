@@ -1,16 +1,22 @@
-const express = require('express')
+import express from 'express'
+import bcrypt from 'bcrypt'
+import { ObjectId } from 'mongodb'
+import passport from 'passport'
+import mongo from '../modules/db.js'
+import { IUser } from '../types.js'
+
 const router = express.Router()
-const bcrypt = require('bcryptjs')
-const { ObjectId } = require('mongodb')
 
 // POST api/auth/login
 // Authenticate user of current session
 // body: {username, password}
 router.post('/login', (req, res) => {
-	const { passport } = req.locals
-	passport.authenticate('local', (err, user, info) => {
+	passport.authenticate('local', (err: any, user: IUser | false) => {
+		if (!user) {
+			return res.status(401).send('Invalid username or password')
+		}
+
 		req.logIn(user, () => {
-			if (!user) return res.status(401).send('Invalid username or password')
 			res.send(`Successfully logged in ${user.username}`)
 		})
 	})(req, res)
@@ -26,7 +32,6 @@ router.get('/user', (req, res) => {
 // Register a new user
 // body: {username, password}
 router.post('/register', async (req, res) => {
-	const { mongo } = req.locals
 	const { username, password } = req.body
 
 	if (!username || !password) return res.status(400).send()
@@ -70,11 +75,14 @@ router.post('/register', async (req, res) => {
 // GET api/auth/logout
 // Logout user of current session
 router.get('/logout', (req, res) => {
-	const username = req.user.username
-	req.logOut()
-	res.send(`Successfully logged out ${username}`)
+	const { user } = req
+	if (!user) {
+		res.status(200).send('No user logged in.')
+		return
+	}
+	req.logout(() => res.status(200).send(`Logged out ${user.username}`))
 })
 
 // TODO: endpoint to delete user and child decks and cards
 
-module.exports = router
+export default router

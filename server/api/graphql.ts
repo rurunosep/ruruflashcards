@@ -1,6 +1,7 @@
-const { buildSchema } = require('graphql')
-const { graphqlHTTP } = require('express-graphql')
-const { ObjectId } = require('mongodb')
+import { buildSchema } from 'graphql'
+import { graphqlHTTP } from 'express-graphql'
+import { ObjectId } from 'mongodb'
+import mongo from '../modules/db'
 const gql = String.raw
 
 const schema = buildSchema(gql`
@@ -50,9 +51,7 @@ const schema = buildSchema(gql`
 
 const resolvers = {
 	// Get all the cards for the first deck of the current user
-	cards: async (args, req) => {
-		const { mongo } = req.locals
-
+	cards: async (args: any, req: Express.Request) => {
 		if (!mongo.isConnected) throw new Error('Mongo error')
 		if (!req.user) throw new Error('No user logged in')
 
@@ -73,8 +72,7 @@ const resolvers = {
 	},
 
 	// Add a card to the first deck of the current user
-	add_card: async (args, req) => {
-		const { mongo } = req.locals
+	add_card: async (args: any, req: Express.Request) => {
 		const { front, back } = args
 
 		if (!mongo.isConnected) throw new Error('Mongo error')
@@ -98,14 +96,13 @@ const resolvers = {
 	},
 
 	// Edit a card in the first deck of the current user
-	edit_card: async (args, req) => {
-		const { mongo } = req.locals
+	edit_card: async (args: any, req: Express.Request) => {
 		const { _id: cardId, front, back } = args
 
 		if (!mongo.isConnected) throw new Error('Mongo error')
 		if (!req.user) throw new Error('No user logged in')
 
-		let changes = {}
+		let changes: any = {}
 		if (typeof front === 'string') changes.front = front
 		if (typeof back === 'string') changes.back = back
 
@@ -129,8 +126,7 @@ const resolvers = {
 	},
 
 	// Delete a card in the first deck of the current user
-	delete_card: async (args, req) => {
-		const { mongo } = req.locals
+	delete_card: async (args: any, req: Express.Request) => {
 		const { _id: cardId } = args
 
 		if (!mongo.isConnected) throw new Error('Mongo error')
@@ -162,7 +158,7 @@ const resolvers = {
 	},
 }
 
-module.exports = graphqlHTTP({
+export default graphqlHTTP({
 	schema,
 	rootValue: resolvers,
 	graphiql: true,

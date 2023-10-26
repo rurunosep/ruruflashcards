@@ -1,12 +1,12 @@
-const express = require('express')
+import express from 'express'
+import { ObjectId } from 'mongodb'
+import mongo from '../modules/db'
+
 const router = express.Router()
-const { ObjectId } = require('mongodb')
 
 // GET api/cards
 // Get all cards in deck of current user
 router.get('/', async (req, res) => {
-	const { mongo } = req.locals
-
 	if (!mongo.isConnected) return res.status(500).send('Mongo error')
 	if (!req.user) return res.status(401).send('No user logged in')
 
@@ -28,7 +28,6 @@ router.get('/', async (req, res) => {
 // Add card to deck of current user
 // body: {front, back}
 router.post('/', async (req, res) => {
-	const { mongo } = req.locals
 	const { front, back } = req.body
 
 	if (typeof front !== 'string' || typeof back !== 'string') return res.status(400).send()
@@ -52,7 +51,6 @@ router.post('/', async (req, res) => {
 // Edit card in deck of current user
 // body: {front?, back?}
 router.put('/:id', async (req, res) => {
-	const { mongo } = req.locals
 	const { front, back } = req.body
 	const { id: cardId } = req.params
 
@@ -68,7 +66,7 @@ router.put('/:id', async (req, res) => {
 		})
 	if (!deck) return res.status(400).send(`User does not own card of id: ${cardId}`)
 
-	let changes = {}
+	let changes: any = {}
 	if (typeof front === 'string') changes.front = front
 	if (typeof back === 'string') changes.back = back
 
@@ -83,7 +81,6 @@ router.put('/:id', async (req, res) => {
 // DELETE api/cards/:id
 // Delete card
 router.delete('/:id', async (req, res) => {
-	const { mongo } = req.locals
 	const { id: cardId } = req.params
 
 	if (!mongo.isConnected) return res.status(500).send('Mongo error')
@@ -106,4 +103,4 @@ router.delete('/:id', async (req, res) => {
 	res.status(204).send()
 })
 
-module.exports = router
+export default router
