@@ -1,106 +1,139 @@
-import express from 'express'
-import { ObjectId } from 'mongodb'
-import mongo from '../modules/db'
+import express from 'express';
+import { ObjectId } from 'mongodb';
+import mongo from '../modules/db';
 
-const router = express.Router()
+const router = express.Router();
 
 // GET api/cards
 // Get all cards in deck of current user
 router.get('/', async (req, res) => {
-	if (!mongo.isConnected) return res.status(500).send('Mongo error')
-	if (!req.user) return res.status(401).send('No user logged in')
+  if (!mongo.isConnected) {
+    res.status(500).send('Mongo error');
+    return;
+  }
+  if (!req.user) {
+    res.status(401).send('No user logged in');
+    return;
+  }
 
-	const deck = await mongo
-		.db('ruruflashcards')
-		.collection('decks')
-		.findOne({ _id: req.user.deck_ids[0] })
+  const deck = await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .findOne({ _id: req.user.deck_ids[0] });
 
-	const cards = await mongo
-		.db('ruruflashcards')
-		.collection('cards')
-		.find({ _id: { $in: deck.card_ids } })
-		.toArray()
+  const cards = await mongo
+    .db('ruruflashcards')
+    .collection('cards')
+    .find({ _id: { $in: deck.card_ids } })
+    .toArray();
 
-	res.send(cards)
-})
+  res.send(cards);
+});
 
 // POST api/cards
 // Add card to deck of current user
 // body: {front, back}
 router.post('/', async (req, res) => {
-	const { front, back } = req.body
+  const { front, back } = req.body;
 
-	if (typeof front !== 'string' || typeof back !== 'string') return res.status(400).send()
-	if (!mongo.isConnected) return res.status(500).send('Mongo error')
-	if (!req.user) return res.status(401).send('No user logged in')
+  if (typeof front !== 'string' || typeof back !== 'string') {
+    res.status(400).send();
+    return;
+  }
+  if (!mongo.isConnected) {
+    res.status(500).send('Mongo error');
+    return;
+  }
+  if (!req.user) {
+    res.status(401).send('No user logged in');
+    return;
+  }
 
-	const { insertedId: newCardId } = await mongo
-		.db('ruruflashcards')
-		.collection('cards')
-		.insertOne({ front, back })
+  const { insertedId: newCardId } = await mongo
+    .db('ruruflashcards')
+    .collection('cards')
+    .insertOne({ front, back });
 
-	await mongo
-		.db('ruruflashcards')
-		.collection('decks')
-		.updateOne({ _id: req.user.deck_ids[0] }, { $push: { card_ids: ObjectId(newCardId) } })
+  await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .updateOne({ _id: req.user.deck_ids[0] }, { $push: { card_ids: new ObjectId(newCardId) } });
 
-	res.status(201).send(newCardId)
-})
+  res.status(201).send(newCardId);
+});
 
 // PUT api/cards/:id
 // Edit card in deck of current user
 // body: {front?, back?}
 router.put('/:id', async (req, res) => {
-	const { front, back } = req.body
-	const { id: cardId } = req.params
+  const { front, back } = req.body;
+  const { id: cardId } = req.params;
 
-	if (!mongo.isConnected) return res.status(500).send('Mongo error')
-	if (!req.user) return res.status(401).send('No user logged in')
+  if (!mongo.isConnected) {
+    res.status(500).send('Mongo error');
+    return;
+  }
+  if (!req.user) {
+    res.status(401).send('No user logged in');
+    return;
+  }
 
-	const deck = await mongo
-		.db('ruruflashcards')
-		.collection('decks')
-		.findOne({
-			_id: req.user.deck_ids[0],
-			card_ids: ObjectId(cardId),
-		})
-	if (!deck) return res.status(400).send(`User does not own card of id: ${cardId}`)
+  const deck = await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .findOne({
+      _id: req.user.deck_ids[0],
+      card_ids: new ObjectId(cardId),
+    });
+  if (!deck) {
+    res.status(400).send(`User does not own card of id: ${cardId}`);
+    return;
+  }
 
-	let changes: any = {}
-	if (typeof front === 'string') changes.front = front
-	if (typeof back === 'string') changes.back = back
+  const changes: any = {};
+  if (typeof front === 'string') changes.front = front;
+  if (typeof back === 'string') changes.back = back;
 
-	await mongo
-		.db('ruruflashcards')
-		.collection('cards')
-		.updateOne({ _id: ObjectId(cardId) }, { $set: changes })
+  await mongo
+    .db('ruruflashcards')
+    .collection('cards')
+    .updateOne({ _id: new ObjectId(cardId) }, { $set: changes });
 
-	res.status(204).send()
-})
+  res.status(204).send();
+});
 
 // DELETE api/cards/:id
 // Delete card
 router.delete('/:id', async (req, res) => {
-	const { id: cardId } = req.params
+  const { id: cardId } = req.params;
 
-	if (!mongo.isConnected) return res.status(500).send('Mongo error')
-	if (!req.user) return res.status(401).send('No user logged in')
+  if (!mongo.isConnected) {
+    res.status(500).send('Mongo error');
+    return;
+  }
+  if (!req.user) {
+    res.status(401).send('No user logged in');
+    return;
+  }
 
-	const deck = await mongo
-		.db('ruruflashcards')
-		.collection('decks')
-		.findOne({
-			_id: req.user.deck_ids[0],
-			card_ids: ObjectId(cardId),
-		})
-	if (!deck) return res.status(400).send(`User does not own card of id: ${cardId}`)
+  const deck = await mongo
+    .db('ruruflashcards')
+    .collection('decks')
+    .findOne({
+      _id: req.user.deck_ids[0],
+      card_ids: new ObjectId(cardId),
+    });
+  if (!deck) {
+    res.status(400).send(`User does not own card of id: ${cardId}`);
+    return;
+  }
 
-	await mongo
-		.db('ruruflashcards')
-		.collection('cards')
-		.deleteOne({ _id: ObjectId(req.params.id) })
+  await mongo
+    .db('ruruflashcards')
+    .collection('cards')
+    .deleteOne({ _id: new ObjectId(req.params.id) });
 
-	res.status(204).send()
-})
+  res.status(204).send();
+});
 
-export default router
+export default router;

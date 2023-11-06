@@ -1,10 +1,10 @@
 export interface IUser {
-	username: string
-	deck_ids: ObjectId[]
+  username: string;
+  deck_ids: ObjectId[];
 }
 
 declare global {
-	namespace Express {
-		interface User extends IUser {}
-	}
+  namespace Express {
+    interface User extends IUser {}
+  }
 }
