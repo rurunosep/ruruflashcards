@@ -18,7 +18,7 @@ Google Cloud Text-to-Speech is used to read out card contents.
 
 ## Building and Running
 
-Build client: `npm run build`
+Build server and client: `npm run build`
 Run server normally: `npm run start`  
 Run server automatically updating on any changes: `npm run dev-server`  
 Run client automatically updating on any changes: `npm run dev-client`  
