@@ -128,6 +128,8 @@ router.delete('/:id', async (req, res) => {
     return;
   }
 
+  // We never delete the card from the array in the deck... lmao
+  // Doesn't matter since we're redoing this all in SQL soon anyway
   await mongo
     .db('ruruflashcards')
     .collection('cards')

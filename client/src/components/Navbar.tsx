@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
-import { ModalContext } from '../context';
+import ClipLoader from 'react-spinners/ClipLoader';
+import { LoadingContext, ModalContext } from '../context';
 
 interface NavbarProps {
   username: string | null;
@@ -8,6 +9,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ username, login, logout }: NavbarProps) {
+  const { login: loginLogout } = useContext(LoadingContext);
+
   const { setRegisterModalOpen } = useContext(ModalContext);
   const [fields, setFields] = useState({ username: '', password: '' });
 
@@ -23,56 +26,54 @@ export default function Navbar({ username, login, logout }: NavbarProps) {
 
   const loginAndRegister = (
     <>
+      <li>
+        <input
+          form="login-form"
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={fields.username}
+          onChange={onChange}
+        />
+      </li>
+      <li>
+        <input
+          form="login-form"
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={fields.password}
+          onChange={onChange}
+        />
+      </li>
+      <li>
+        <button
+          className="btn-small margin-none"
+          type="submit"
+          form="login-form"
+          popover-bottom="Login"
+        >
+          <div className="flip-horizontal margin-none">
+            <i className="flaticon-exit-hand-drawn-interface-symbol-variant" />
+          </div>
+        </button>
+      </li>
+      <li>
+        <button
+          type="button"
+          className="btn-small margin-none"
+          popover-bottom="Register"
+          onClick={() => setRegisterModalOpen(true)}
+        >
+          <i className="flaticon-add-user-hand-drawn-outline" />
+        </button>
+      </li>
       <form id="login-form" onSubmit={onSubmit} />
-      <ul className="inline">
-        <li>
-          <input
-            form="login-form"
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={fields.username}
-            onChange={onChange}
-          />
-        </li>
-        <li>
-          <input
-            form="login-form"
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={fields.password}
-            onChange={onChange}
-          />
-        </li>
-        <li>
-          <button
-            className="btn-small margin-none"
-            type="submit"
-            form="login-form"
-            popover-bottom="Login"
-          >
-            <div className="flip-horizontal margin-none">
-              <i className="flaticon-exit-hand-drawn-interface-symbol-variant" />
-            </div>
-          </button>
-        </li>
-        <li>
-          <button
-            type="button"
-            className="btn-small margin-none"
-            popover-bottom="Register"
-            onClick={() => setRegisterModalOpen(true)}
-          >
-            <i className="flaticon-add-user-hand-drawn-outline" />
-          </button>
-        </li>
-      </ul>
     </>
   );
 
   const usernameAndLogout = (
-    <ul className="inline">
+    <>
       <li>
         <p className="margin-none">{username}</p>
       </li>
@@ -86,7 +87,7 @@ export default function Navbar({ username, login, logout }: NavbarProps) {
           <i className="flaticon-exit-hand-drawn-interface-symbol" />
         </button>
       </li>
-    </ul>
+    </>
   );
 
   return (
@@ -95,7 +96,12 @@ export default function Navbar({ username, login, logout }: NavbarProps) {
         <i className="flaticon-gallery-hand-drawn-interface-symbol-of-irregular-squares-outlines padding-small" />
         RuruFlashcards
       </h3>
-      {username ? usernameAndLogout : loginAndRegister}
+      <ul className="inline">
+        <li>
+          <ClipLoader loading={loginLogout.loading} size="1em" />
+        </li>
+        {username ? usernameAndLogout : loginAndRegister}
+      </ul>
     </nav>
   );
 }

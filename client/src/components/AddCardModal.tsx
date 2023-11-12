@@ -1,5 +1,3 @@
-// TODO
-
 import { useState, useContext } from 'react';
 import { ModalContext } from '../context';
 

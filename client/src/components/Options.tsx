@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
 interface OptionsProps {
@@ -29,7 +29,6 @@ export default function Options({
 }: OptionsProps) {
   const [languages, setLanguages] = useState([] as string[]);
   const [voices, setVoices] = useState([] as TtsVoice[]);
-  const [filteredVoiceNames, setFilteredVoiceNames] = useState([] as string[]);
 
   // Get language codes
   useEffect(() => {
@@ -41,18 +40,21 @@ export default function Options({
     axios.get('/api/tts/voices').then((res) => setVoices(res.data));
   }, []);
 
-  // Filter voices
-  // TODO: useMemo instead?
+  const filteredVoiceNames = useMemo(
+    () =>
+      voices
+        .filter((voice) => voice.languageCodes.includes(ttsLanguage))
+        .sort((a, b) => {
+          if (a.name < b.name) return -1;
+          if (a.name > b.name) return 1;
+          return 0;
+        })
+        .map((voice) => voice.name),
+    [voices, ttsLanguage],
+  );
+
+  // Set selected TTS voice name when filtered voice changes
   useEffect(() => {
-    const filteredVoiceNames = voices
-      .filter((voice) => voice.languageCodes.includes(ttsLanguage))
-      .sort((a, b) => {
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
-        return 0;
-      })
-      .map((voice) => voice.name);
-    setFilteredVoiceNames(filteredVoiceNames);
     // This condition is so that the voice name read from local storage is not
     // unset when voices are first loaded
     if (
@@ -62,7 +64,7 @@ export default function Options({
     ) {
       setTtsVoiceName(filteredVoiceNames[0]);
     }
-  }, [ttsLanguage, voices]);
+  }, [filteredVoiceNames]);
 
   return (
     <div className="card card-no-hover">

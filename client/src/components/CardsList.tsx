@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
-import { ModalContext } from '../context';
+import ClipLoader from 'react-spinners/ClipLoader';
+import { ModalContext, LoadingContext } from '../context';
 
 interface CardsListProps {
   cards: Card[];
@@ -7,6 +8,10 @@ interface CardsListProps {
 
 export default function CardsList({ cards }: CardsListProps) {
   const { setAddCardModalOpen, setEditCardModalOpen, setCardToEdit } = useContext(ModalContext);
+  const {
+    addCard: { loading: addCardLoading },
+    editDeleteCard: { cardIds: loadingCardIds },
+  } = useContext(LoadingContext);
   const [listVisible, setListVisible] = useState(true);
 
   return (
@@ -38,15 +43,18 @@ export default function CardsList({ cards }: CardsListProps) {
               <i className="flaticon-down-arrow-hand-drawn-triangle" />
             )}
           </label>
-          <button
-            type="button"
-            className="btn-small margin-none"
-            popover-top="Add Card"
-            style={{ margin: '0.5rem' }}
-            onClick={() => setAddCardModalOpen(true)}
-          >
-            <i className="flaticon-plus-hand-drawn-sign" />
-          </button>
+          <div>
+            <ClipLoader loading={addCardLoading} size="1em" />
+            <button
+              type="button"
+              className="btn-small margin-none"
+              popover-top="Add Card"
+              style={{ margin: '0.5rem' }}
+              onClick={() => setAddCardModalOpen(true)}
+            >
+              <i className="flaticon-plus-hand-drawn-sign" />
+            </button>
+          </div>
         </div>
         <div className="collapsible-body" style={{ padding: '0' }}>
           <div style={{ height: '19rem', overflowY: 'scroll', borderTop: '2px solid #e6e7e9' }}>
@@ -66,17 +74,21 @@ export default function CardsList({ cards }: CardsListProps) {
                   className="col-2 padding-right"
                   style={{ display: 'flex', justifyContent: 'center' }}
                 >
-                  <button
-                    type="button"
-                    className="btn-small margin-none"
-                    popover-top="Edit Card"
-                    onClick={() => {
-                      setCardToEdit(card);
-                      setEditCardModalOpen(true);
-                    }}
-                  >
-                    <i className="flaticon-pencil-hand-drawn-tool-outline" />
-                  </button>
+                  {loadingCardIds.includes(card._id) ? (
+                    <ClipLoader loading size="1.5em" />
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn-small margin-none"
+                      popover-top="Edit Card"
+                      onClick={() => {
+                        setCardToEdit(card);
+                        setEditCardModalOpen(true);
+                      }}
+                    >
+                      <i className="flaticon-pencil-hand-drawn-tool-outline" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

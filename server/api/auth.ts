@@ -99,6 +99,4 @@ router.get('/logout', (req, res) => {
   res.status(200).send(`Logged out ${user.username}`);
 });
 
-// TODO: endpoint to delete user and child decks and cards
-
 export default router;
