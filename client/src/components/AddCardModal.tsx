@@ -40,6 +40,7 @@ export default function AddCardModal({ addCard }: AddCardModalProps) {
             <div className="form-group">
               <input
                 type="text"
+                size={30}
                 name="front"
                 placeholder="Front"
                 value={fields.front}
@@ -49,6 +50,7 @@ export default function AddCardModal({ addCard }: AddCardModalProps) {
             <div className="form-group">
               <input
                 type="text"
+                size={30}
                 name="back"
                 placeholder="Back"
                 value={fields.back}

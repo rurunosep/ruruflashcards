@@ -60,6 +60,7 @@ export default function EditCardModal({ editCard, deleteCard }: EditCardModalPro
             <div className="form-group">
               <input
                 type="text"
+                size={30}
                 name="front"
                 placeholder="Front"
                 value={fields.front}
@@ -69,6 +70,7 @@ export default function EditCardModal({ editCard, deleteCard }: EditCardModalPro
             <div className="form-group">
               <input
                 type="text"
+                size={30}
                 name="back"
                 placeholder="Back"
                 value={fields.back}

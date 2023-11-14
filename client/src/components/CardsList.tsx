@@ -15,7 +15,7 @@ export default function CardsList({ cards }: CardsListProps) {
   const [listVisible, setListVisible] = useState(true);
 
   return (
-    <div className="card card-no-hover" style={{ height: '22.5rem' }}>
+    <div className="card card-no-hover" style={{ height: '24.5rem' }}>
       <div className="collapsible" style={{ borderTop: 'none' }}>
         {/* id MUST start with "collapsible" */}
         <input
@@ -57,7 +57,7 @@ export default function CardsList({ cards }: CardsListProps) {
           </div>
         </div>
         <div className="collapsible-body" style={{ padding: '0' }}>
-          <div style={{ height: '19rem', overflowY: 'scroll', borderTop: '2px solid #e6e7e9' }}>
+          <div style={{ height: '21rem', overflowY: 'scroll', borderTop: '2px solid #e6e7e9' }}>
             {cards.map((card) => (
               <div
                 key={card._id}

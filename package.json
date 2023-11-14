@@ -1,23 +1,23 @@
 {
-	"name": "ruruflashcards",
-	"author": "Kevin Hernandez-Rives <rurunosep@gmail.com>",
-	"private": true,
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/rurunosep/ruruflashcards.git"
-	},
-	"workspaces": [
-		"./server",
-		"./client"
-	],
-	"scripts": {
-		"start": "npm run start --prefix server",
-		"build": "npm run build --prefix server && npm run build --prefix client",
-		"dev-server": "npm run dev --prefix server",
-		"dev-client": "npm run start --prefix client",
-		"dev-both": "concurrently \"npm run dev-server\" \"npm run dev-client\""
-	},
-	"devDependencies": {
-		"concurrently": "^5.2.0"
-	}
+  "name": "ruruflashcards",
+  "author": "Kevin Hernandez-Rives <rurunosep@gmail.com>",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rurunosep/ruruflashcards.git"
+  },
+  "workspaces": [
+    "./server",
+    "./client"
+  ],
+  "scripts": {
+    "start": "npm run start --prefix server",
+    "build": "npm run build --prefix server && npm run build --prefix client",
+    "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
+    "dev-server": "npm run dev --prefix server",
+    "dev-client": "npm run start --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^5.2.0"
+  }
 }

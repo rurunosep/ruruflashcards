@@ -55,13 +55,14 @@ export default function Quiz({
     }
   }, [card]);
 
+  // TODO styling
   return (
-    <div className="card card-no-hover margin-bottom" style={{}}>
+    <div className="card card-no-hover margin-bottom">
       <button
         type="button"
         className="btn-small margin-none"
         popover-top="Play TTS"
-        style={{ position: 'absolute', top: '0.5rem', left: '0.5rem' }}
+        style={{ position: 'absolute', top: '0.5em', left: '0.5em' }}
         onClick={playTTS}
       >
         <i className="flaticon-sound-hand-drawn-interface-symbol" />
@@ -70,7 +71,7 @@ export default function Quiz({
         type="button"
         className="btn-small margin-none"
         popover-top="Flip Card"
-        style={{ position: 'absolute', top: '0.5rem' }}
+        style={{ position: 'absolute', top: '0.5em' }}
         onClick={() => setFlipped(!flipped)}
       >
         <i className="flaticon-cycle-couple-of-arrows-hand-drawn-lines" />
@@ -79,7 +80,7 @@ export default function Quiz({
         type="button"
         className="btn-small margin-none"
         popover-top="Random Card"
-        style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
+        style={{ position: 'absolute', top: '0.5em', right: '0.5em' }}
         onClick={() => {
           setShowNewCard(true);
           setFlipped(false);
@@ -90,12 +91,13 @@ export default function Quiz({
       <div
         style={{
           display: 'flex',
+          margin: '1em 1em',
           minHeight: '12rem',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <span style={{ fontSize: '2.5rem' }}>
+        <span style={{ fontSize: '2.5em' }}>
           {
             // It works. Don't worry about it...
             // eslint-disable-next-line no-nested-ternary

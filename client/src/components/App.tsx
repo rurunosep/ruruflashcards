@@ -174,7 +174,7 @@ export default function App() {
 
   const mainContent = (
     <div className="row flex-center margin-none">
-      <div className="sm-col margin-small" style={{ width: '25rem' }}>
+      <div className="sm-col margin-small" style={{ width: '20rem' }}>
         <Quiz
           cards={cards}
           ttsLanguage={ttsLanguage}
@@ -193,21 +193,35 @@ export default function App() {
           setReverseQuiz={setReverseQuiz}
         />
       </div>
-      <div className="sm-col margin-small" style={{ width: '25rem' }}>
+      <div className="sm-col margin-small" style={{ width: '20rem' }}>
         <CardsList cards={cards} />
       </div>
     </div>
   );
 
   return (
-    <>
-      <Navbar username={username} login={login} logout={logout} />
-      <ErrorAlert errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
-      {username && (loadingStates.cards.loading ? cardsLoadingSpinner : mainContent)}
-      <Footer />
+    <div className="container">
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <div>
+          <Navbar username={username} login={login} logout={logout} />
+          <ErrorAlert errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
+        </div>
+        <div style={{ flex: '1 0 auto' }}>
+          {username && (loadingStates.cards.loading ? cardsLoadingSpinner : mainContent)}
+        </div>
+        <div>
+          <Footer />
+        </div>
+      </div>
       <RegisterModal register={register} setErrorMessage={setErrorMessage} />
       <AddCardModal addCard={addCard} />
       <EditCardModal editCard={editCard} deleteCard={deleteCard} />
-    </>
+    </div>
   );
 }

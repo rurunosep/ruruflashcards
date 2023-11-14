@@ -1,3 +1,11 @@
+html,
+body,
+#root,
+.container {
+  height: 100%;
+  min-height: 100%;
+}
+
 .card-no-hover:hover {
   transform: none;
   box-shadow: 15px 28px 25px -18px rgba(0, 0, 0, 0.2);
@@ -29,19 +37,10 @@ nav {
   z-index: initial;
 }
 
-/* Make the footer go to the bottom of the window */
-
-html,
-body,
-#root {
-  height: 100%;
-}
-
-#root {
-  display: flex;
-  flex-direction: column;
-}
-
-footer {
-  margin-top: auto;
+@media only screen and (max-width: 768px) {
+  nav ul.inline li {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+  }
 }
