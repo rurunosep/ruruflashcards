@@ -1,0 +1,29 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: ['deploy-aws']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t 454158562433.dkr.ecr.us-east-1.amazonaws.com/ruruflashcards .
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push Docker image to Amazon ECR
+        run: docker push 454158562433.dkr.ecr.us-east-1.amazonaws.com/ruruflashcards:latest
