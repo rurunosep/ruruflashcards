@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    name: Build Docker image and push to Amazon ECR
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -27,3 +28,21 @@ jobs:
 
       - name: Push Docker image to Amazon ECR
         run: docker push 454158562433.dkr.ecr.us-east-1.amazonaws.com/ruruflashcards:latest
+
+  deploy:
+    name: Pull Docker image and run container inside EC2 instance
+    needs: build
+    runs-on: ruruflashcards-ec2
+    steps:
+      - name: Pull Docker image
+        run: docker pull 454158562433.dkr.ecr.us-east-1.amazonaws.com/ruruflashcards:latest
+
+      - name: Stop and delete previous Docker container
+        run: docker rm -f ruruflashcards-server
+
+      - name: Run new Docker container
+        run: >
+          docker run -d -p 80:5000 -p 443:5000
+          --env-file ~/ruruflashcards-env-file
+          --name ruruflashcards-server
+          454158562433.dkr.ecr.us-east-1.amazonaws.com/ruruflashcards:latest
