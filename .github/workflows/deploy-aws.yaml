@@ -45,7 +45,7 @@ jobs:
 
       - name: Stop and delete previous Docker containers and images
         run: |
-          docker stop ruruflashcards-server --time 0
+          docker stop ruruflashcards-server --time 0 || true
           docker container prune -f
           docker image prune -f
 
