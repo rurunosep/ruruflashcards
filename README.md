@@ -20,6 +20,7 @@ Google Cloud Text-to-Speech is used to read out card contents.
 
 ## Future Plans
 
+- Configure infrastructure with Terraform
 - Host client statically in an Amazon S3 bucket
 - Replace GraphQL API with REST API
 - Replace MongoDB with self-hosted SQL DB

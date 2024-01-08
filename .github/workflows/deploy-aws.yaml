@@ -22,7 +22,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Login to Amazon ECR
+      - name: Login Docker to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
@@ -34,15 +34,26 @@ jobs:
     needs: build
     runs-on: ruruflashcards-ec2
     steps:
+      - name: Login Docker to Amazon ECR
+        run: >
+          aws ecr get-login-password --region us-east-1 |
+          docker login --username AWS --password-stdin
+          454158562433.dkr.ecr.us-east-1.amazonaws.com
+
       - name: Pull Docker image
         run: docker pull 454158562433.dkr.ecr.us-east-1.amazonaws.com/ruruflashcards:latest
 
-      - name: Stop and delete previous Docker container
-        run: docker rm -f ruruflashcards-server
+      - name: Stop and delete previous Docker containers and images
+        run: |
+          docker stop ruruflashcards-server --time 0
+          docker container prune -f
+          docker image prune -f
 
       - name: Run new Docker container
         run: >
           docker run -d -p 80:5000 -p 443:5000
-          --env-file ~/ruruflashcards-env-file
           --name ruruflashcards-server
+          --env GOOGLE_CLOUD_CREDENTIALS="$(aws ssm get-parameter --name /ruruflashcards/google-cloud-credentials | jq -r '.Parameter.Value')"
+          --env MONGODB_URI="$(aws ssm get-parameter --name /ruruflashcards/mongodb-uri | jq -r '.Parameter.Value')"
+          --env SESSION_SECRET="$(aws ssm get-parameter --name /ruruflashcards/session-secret | jq -r '.Parameter.Value')"
           454158562433.dkr.ecr.us-east-1.amazonaws.com/ruruflashcards:latest
